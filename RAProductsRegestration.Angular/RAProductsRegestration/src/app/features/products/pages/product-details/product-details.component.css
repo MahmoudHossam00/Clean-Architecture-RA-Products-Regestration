@@ -1,0 +1,55 @@
+:host { display: block; }
+.breadcrumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; color: var(--text-secondary); font-size: 13px; }
+.breadcrumbs a { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; font-weight: 600; }
+.breadcrumbs a:hover { color: var(--primary); }
+.breadcrumbs svg { width: 15px; height: 15px; }
+.breadcrumb-divider { color: var(--border-dark); }
+.product-header-card { display: flex; align-items: flex-start; gap: 20px; padding: 28px; margin-bottom: 24px; border-top: 3px solid var(--primary); }
+.product-icon { display: grid; place-items: center; flex-shrink: 0; width: 58px; height: 58px; border: 1px solid #c9e5e6; border-radius: 14px; background: var(--primary-light); color: var(--primary); }
+.product-icon svg { width: 30px; height: 30px; }
+.product-heading { min-width: 0; flex: 1; }
+.heading-label { display: block; margin-bottom: 7px; color: var(--primary); font-size: 10px; font-weight: 750; letter-spacing: 1.3px; text-transform: uppercase; }
+.product-heading h1 { margin: 0 0 20px; color: var(--text-primary); font-size: clamp(22px, 2.1vw, 29px); font-weight: 750; letter-spacing: -.7px; line-height: 1.3; overflow-wrap: anywhere; }
+.product-metadata { display: flex; flex-wrap: wrap; gap: 16px 28px; margin: 0; }
+.product-metadata > div { min-width: 92px; padding-right: 28px; border-right: 1px solid var(--border); }
+.product-metadata > div:last-child { padding-right: 0; border-right: 0; }
+.product-metadata dt { margin-bottom: 5px; color: var(--text-secondary); font-size: 12px; }
+.product-metadata dd { margin: 0; color: var(--text-primary); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.code-value { font-family: Consolas, monospace; }
+.workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+.side-navigation { padding: 17px 10px 12px; position: sticky; top: 88px; }
+.navigation-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px 16px; border-bottom: 1px solid var(--border); }
+.navigation-heading h2 { margin: 0; color: var(--text-primary); font-size: 14px; font-weight: 700; }
+.navigation-heading > span { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 6px; background: var(--surface-secondary); color: var(--text-secondary); font-size: 11px; font-weight: 650; }
+.nav-group h3 { margin: 20px 10px 8px; color: var(--text-secondary); font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+.nav-links { display: grid; gap: 4px; }
+.nav-item { display: flex; align-items: flex-start; gap: 11px; padding: 11px 10px; border: 1px solid transparent; border-radius: 8px; color: var(--text-secondary); transition: var(--transition); }
+.nav-item:hover { background: var(--surface-secondary); color: var(--text-primary); }
+.nav-item.active { border-color: #c9e5e6; background: var(--primary-light); color: var(--primary); }
+.nav-icon { flex-shrink: 0; width: 19px; height: 19px; margin-top: 1px; }
+.nav-item > span { min-width: 0; }
+.nav-item strong { display: block; color: inherit; font-size: 14px; font-weight: 650; line-height: 1.45; }
+.nav-item small { display: block; margin-top: 3px; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.product-content { min-width: 0; width: 100%; }
+@media (max-width: 1100px) {
+  .workspace { grid-template-columns: 1fr; gap: 20px; }
+  .side-navigation { position: static; padding: 16px; }
+  .navigation-heading { padding: 0 0 12px; }
+  .section-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .nav-group h3 { margin: 15px 4px 8px; }
+  .nav-item { padding: 9px 8px; gap: 8px; }
+  .nav-item small { display: none; }
+}
+@media (max-width: 600px) {
+  .product-header-card { gap: 12px; padding: 20px 16px; }
+  .product-icon { width: 40px; height: 40px; border-radius: 10px; }
+  .product-icon svg { width: 23px; height: 23px; }
+  .product-heading h1 { margin-bottom: 16px; font-size: 22px; }
+  .product-metadata { gap: 14px 18px; }
+  .product-metadata > div { min-width: 0; padding-right: 0; border: 0; }
+  .company-metadata { flex-basis: 100%; }
+  .section-groups { grid-template-columns: 1fr; gap: 0; }
+  .nav-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav-group h3 { margin-top: 16px; }
+  .nav-item strong { font-size: 13px; }
+}

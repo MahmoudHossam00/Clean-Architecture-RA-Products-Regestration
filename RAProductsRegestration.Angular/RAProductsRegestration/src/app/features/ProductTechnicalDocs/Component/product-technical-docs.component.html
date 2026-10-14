@@ -1,0 +1,2093 @@
+<section class="technical-docs-page" [attr.aria-busy]="loading" aria-label="Technical documents">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <header class="section-header">
+
+    <div class="section-title">
+
+      <span class="section-label">
+        Registration
+      </span>
+
+      <div class="title-row">
+
+        <h2>
+          Product Technical Docs
+        </h2>
+
+        <span
+          *ngIf="technicalDocs"
+          class="status-pill created"
+        >
+          Created
+        </span>
+
+        <span
+          *ngIf="technicalDocsMissing"
+          class="status-pill not-created"
+        >
+          Not Created
+        </span>
+
+      </div>
+
+      <p>
+        Maintain approved specifications,
+        composition, method of analysis and validation history.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="loading || saving"
+      (click)="load()"
+    >
+      Refresh
+    </button>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Messages -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorMessage"
+    class="message error-message" role="alert"
+  >
+
+    <span class="message-icon">
+      !
+    </span>
+
+    <span>
+      {{ errorMessage }}
+    </span>
+
+  </div>
+
+
+  <div
+    *ngIf="successMessage"
+    class="message success-message" role="status"
+  >
+
+    <span class="message-icon">
+      ✓
+    </span>
+
+    <span>
+      {{ successMessage }}
+    </span>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Loading -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="loading-card card" role="status"
+  >
+
+    <div class="spinner"></div>
+
+    <div>
+
+      <strong>
+        Loading Product Technical Docs
+      </strong>
+
+      <span>
+        Please wait...
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Not Created -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      technicalDocsMissing
+    "
+    class="card create-state-card"
+  >
+
+    <div class="create-state-icon">
+      TD
+    </div>
+
+
+    <div class="create-state-content">
+
+      <span class="section-label">
+        Initial Setup
+      </span>
+
+      <h3>
+        Create Product Technical Docs
+      </h3>
+
+      <p>
+        This product does not have a Product Technical Docs
+        record yet. Create it before adding specifications,
+        composition and MOA validation documents.
+      </p>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="saving"
+        (click)="createTechnicalDocs()"
+      >
+
+        <span
+          *ngIf="saving"
+          class="button-spinner"
+        ></span>
+
+        {{
+          saving
+            ? 'Creating...'
+            : 'Create Product Technical Docs'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Technical Docs Exists -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading &&
+      technicalDocs
+    "
+  >
+
+    <!-- =================================================== -->
+    <!-- Overview -->
+    <!-- =================================================== -->
+
+    <section class="technical-summary-grid">
+
+      <!-- Specifications -->
+
+      <article class="summary-card card">
+
+        <div class="summary-icon">
+          SP
+        </div>
+
+        <div>
+
+          <span>
+            Specifications
+          </span>
+
+          <strong>
+            {{
+              technicalDocs.currentApprovedSpecifications
+                ? technicalDocs.currentApprovedSpecifications.approvalDate
+                : 'Not approved'
+            }}
+          </strong>
+
+          <small>
+            {{
+              technicalDocs.approvedSpecificationsHistory.length
+            }}
+            approval(s)
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- Composition -->
+
+      <article class="summary-card card">
+
+        <div class="summary-icon">
+          CP
+        </div>
+
+        <div>
+
+          <span>
+            Composition
+          </span>
+
+          <strong>
+            {{
+              technicalDocs.currentApprovedComposition
+                ? technicalDocs.currentApprovedComposition.approvalDate
+                : 'Not approved'
+            }}
+          </strong>
+
+          <small>
+            {{
+              technicalDocs.approvedCompositionHistory.length
+            }}
+            approval(s)
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- MOA -->
+
+      <article class="summary-card card">
+
+        <div class="summary-icon">
+          MOA
+        </div>
+
+        <div>
+
+          <span>
+            MOA + Validation
+          </span>
+
+          <strong>
+            {{
+              technicalDocs.currentApprovedMoaValidation
+                ? technicalDocs.currentApprovedMoaValidation.approvalDate
+                : 'Not approved'
+            }}
+          </strong>
+
+          <small>
+            {{
+              technicalDocs.approvedMoaValidationHistory.length
+            }}
+            approval(s)
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- Tabs -->
+    <!-- =================================================== -->
+
+    <nav class="technical-docs-tabs">
+
+      <!-- Specifications -->
+
+      <button
+        type="button"
+        class="technical-docs-tab"
+        [attr.aria-pressed]="
+          activeTab === 'specifications'
+        "
+          [class.active]="
+          activeTab === 'specifications'
+        "
+        (click)="
+          setActiveTab('specifications')
+        "
+      >
+
+        <span class="tab-icon">
+          SP
+        </span>
+
+        <span class="tab-content">
+
+          <strong>
+            Specifications
+          </strong>
+
+          <small>
+            Product specifications
+          </small>
+
+        </span>
+
+
+        <span class="tab-count">
+          {{
+            technicalDocs
+              .approvedSpecificationsHistory
+              .length
+          }}
+        </span>
+
+      </button>
+
+
+      <!-- Composition -->
+
+      <button
+        type="button"
+        class="technical-docs-tab"
+        [attr.aria-pressed]="
+          activeTab === 'composition'
+        "
+          [class.active]="
+          activeTab === 'composition'
+        "
+        (click)="
+          setActiveTab('composition')
+        "
+      >
+
+        <span class="tab-icon">
+          CP
+        </span>
+
+        <span class="tab-content">
+
+          <strong>
+            Composition
+          </strong>
+
+          <small>
+            Approved composition
+          </small>
+
+        </span>
+
+
+        <span class="tab-count">
+          {{
+            technicalDocs
+              .approvedCompositionHistory
+              .length
+          }}
+        </span>
+
+      </button>
+
+
+      <!-- MOA -->
+
+      <button
+        type="button"
+        class="technical-docs-tab"
+        [attr.aria-pressed]="
+          activeTab === 'moa-validation'
+        "
+          [class.active]="
+          activeTab === 'moa-validation'
+        "
+        (click)="
+          setActiveTab('moa-validation')
+        "
+      >
+
+        <span class="tab-icon">
+          MOA
+        </span>
+
+        <span class="tab-content">
+
+          <strong>
+            MOA + Validation
+          </strong>
+
+          <small>
+            Method & validation
+          </small>
+
+        </span>
+
+
+        <span class="tab-count">
+          {{
+            technicalDocs
+              .approvedMoaValidationHistory
+              .length
+          }}
+        </span>
+
+      </button>
+
+    </nav>
+
+
+    <!-- =================================================== -->
+    <!-- Tab Content -->
+    <!-- =================================================== -->
+
+    <ng-container
+      [ngSwitch]="activeTab"
+    >
+
+
+      <!-- ================================================= -->
+      <!-- SPECIFICATIONS -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'specifications'"
+      >
+
+        <section class="card document-section">
+
+          <!-- Header -->
+
+          <div class="document-section-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Technical Document
+              </span>
+
+              <h3>
+                Approved Specifications
+              </h3>
+
+              <p>
+                Maintain finished-product specifications
+                and their historical approvals.
+              </p>
+
+            </div>
+
+
+            <div class="document-header-actions">
+
+              <span class="count-badge">
+
+                {{
+                  technicalDocs
+                    .approvedSpecificationsHistory
+                    .length
+                }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="saving"
+                (click)="openCreationModal()"
+              >
+                + Add New Approval
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Current -->
+
+          <ng-container
+            *ngIf="
+              technicalDocs
+                .currentApprovedSpecifications
+                as current
+            "
+          >
+
+            <div class="current-title-row">
+
+              <div>
+
+                <span class="current-document-label">
+                  Current Approval
+                </span>
+
+                <h4>
+                  Latest Approved Specifications
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="current-document">
+
+              <div class="current-document-grid">
+
+                <div>
+
+                  <span>
+                    Approval Date
+                  </span>
+
+                  <strong>
+                    {{ current.approvalDate }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    File Name
+                  </span>
+
+                  <strong>
+                    {{ current.attachment.fileName }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Notes
+                  </span>
+
+                  <strong>
+                    {{
+                      current.attachment.notes ||
+                      'No notes'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div class="document-actions">
+
+                <button
+                  *ngIf="
+                    isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    previewPdf(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Preview PDF
+                </button>
+
+
+                <button
+                  *ngIf="
+                    !isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    openAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Open
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    downloadAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Download
+                </button>
+
+              </div>
+
+            </div>
+
+          </ng-container>
+
+
+          <!-- Empty -->
+
+          <div
+            *ngIf="
+              !technicalDocs
+                .currentApprovedSpecifications
+            "
+            class="empty-document"
+          >
+
+            <div class="empty-document-icon">
+              SP
+            </div>
+
+            <strong>
+              No approved specifications
+            </strong>
+
+            <span>
+              No specification approval has been added yet.
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-primary empty-action"
+              (click)="openCreationModal()"
+            >
+              Add First Approval
+            </button>
+
+          </div>
+
+
+          <!-- History -->
+
+          <div
+            *ngIf="
+              technicalDocs
+                .approvedSpecificationsHistory
+                .length > 0
+            "
+            class="history-section"
+          >
+
+            <div class="subsection-divider">
+
+              <span>
+                Approval History
+              </span>
+
+            </div>
+
+
+            <div class="history-list">
+
+              <div
+                class="history-row"
+                *ngFor="
+                  let item
+                  of technicalDocs
+                    .approvedSpecificationsHistory;
+                  let first = first
+                "
+              >
+
+                <div class="history-document-icon">
+                  SP
+                </div>
+
+
+                <div class="history-main">
+
+                  <div class="history-name-row">
+
+                    <strong>
+                      {{ item.attachment.fileName }}
+                    </strong>
+
+                    <span
+                      *ngIf="first"
+                      class="current-badge"
+                    >
+                      Current
+                    </span>
+
+                  </div>
+
+
+                  <span>
+                    Approved:
+                    {{ item.approvalDate }}
+                  </span>
+
+
+                  <small
+                    *ngIf="
+                      item.attachment.notes
+                    "
+                  >
+                    {{ item.attachment.notes }}
+                  </small>
+
+                </div>
+
+
+                <div class="history-actions">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      previewPdf(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Preview
+                  </button>
+
+
+                  <button
+                    *ngIf="
+                      !isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      openAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Open
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      downloadAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Download
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- COMPOSITION -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'composition'"
+      >
+
+        <section class="card document-section">
+
+          <div class="document-section-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Technical Document
+              </span>
+
+              <h3>
+                Approved Composition
+              </h3>
+
+              <p>
+                Maintain product composition
+                and its historical approvals.
+              </p>
+
+            </div>
+
+
+            <div class="document-header-actions">
+
+              <span class="count-badge">
+
+                {{
+                  technicalDocs
+                    .approvedCompositionHistory
+                    .length
+                }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="saving"
+                (click)="openCreationModal()"
+              >
+                + Add New Approval
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Current -->
+
+          <ng-container
+            *ngIf="
+              technicalDocs
+                .currentApprovedComposition
+                as current
+            "
+          >
+
+            <div class="current-title-row">
+
+              <div>
+
+                <span class="current-document-label">
+                  Current Approval
+                </span>
+
+                <h4>
+                  Latest Approved Composition
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="current-document">
+
+              <div class="current-document-grid">
+
+                <div>
+
+                  <span>
+                    Approval Date
+                  </span>
+
+                  <strong>
+                    {{ current.approvalDate }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    File Name
+                  </span>
+
+                  <strong>
+                    {{ current.attachment.fileName }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Notes
+                  </span>
+
+                  <strong>
+                    {{
+                      current.attachment.notes ||
+                      'No notes'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div class="document-actions">
+
+                <button
+                  *ngIf="
+                    isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    previewPdf(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Preview PDF
+                </button>
+
+
+                <button
+                  *ngIf="
+                    !isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    openAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Open
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    downloadAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Download
+                </button>
+
+              </div>
+
+            </div>
+
+          </ng-container>
+
+
+          <!-- Empty -->
+
+          <div
+            *ngIf="
+              !technicalDocs
+                .currentApprovedComposition
+            "
+            class="empty-document"
+          >
+
+            <div class="empty-document-icon">
+              CP
+            </div>
+
+            <strong>
+              No approved composition
+            </strong>
+
+            <span>
+              No composition approval has been added yet.
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-primary empty-action"
+              (click)="openCreationModal()"
+            >
+              Add First Approval
+            </button>
+
+          </div>
+
+
+          <!-- History -->
+
+          <div
+            *ngIf="
+              technicalDocs
+                .approvedCompositionHistory
+                .length > 0
+            "
+            class="history-section"
+          >
+
+            <div class="subsection-divider">
+
+              <span>
+                Approval History
+              </span>
+
+            </div>
+
+
+            <div class="history-list">
+
+              <div
+                class="history-row"
+                *ngFor="
+                  let item
+                  of technicalDocs
+                    .approvedCompositionHistory;
+                  let first = first
+                "
+              >
+
+                <div class="history-document-icon">
+                  CP
+                </div>
+
+
+                <div class="history-main">
+
+                  <div class="history-name-row">
+
+                    <strong>
+                      {{ item.attachment.fileName }}
+                    </strong>
+
+                    <span
+                      *ngIf="first"
+                      class="current-badge"
+                    >
+                      Current
+                    </span>
+
+                  </div>
+
+
+                  <span>
+                    Approved:
+                    {{ item.approvalDate }}
+                  </span>
+
+
+                  <small
+                    *ngIf="
+                      item.attachment.notes
+                    "
+                  >
+                    {{ item.attachment.notes }}
+                  </small>
+
+                </div>
+
+
+                <div class="history-actions">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      previewPdf(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Preview
+                  </button>
+
+
+                  <button
+                    *ngIf="
+                      !isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      openAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Open
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      downloadAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Download
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- MOA + VALIDATION -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'moa-validation'"
+      >
+
+        <section class="card document-section">
+
+          <div class="document-section-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Technical Document
+              </span>
+
+              <h3>
+                Approved MOA + Validation
+              </h3>
+
+              <p>
+                Maintain approved Method of Analysis,
+                validation documents and approval history.
+              </p>
+
+            </div>
+
+
+            <div class="document-header-actions">
+
+              <span class="count-badge">
+
+                {{
+                  technicalDocs
+                    .approvedMoaValidationHistory
+                    .length
+                }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="saving"
+                (click)="openCreationModal()"
+              >
+                + Add New Approval
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Current -->
+
+          <ng-container
+            *ngIf="
+              technicalDocs
+                .currentApprovedMoaValidation
+                as current
+            "
+          >
+
+            <div class="current-title-row">
+
+              <div>
+
+                <span class="current-document-label">
+                  Current Approval
+                </span>
+
+                <h4>
+                  Latest Approved MOA + Validation
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="current-document">
+
+              <div class="current-document-grid">
+
+                <div>
+
+                  <span>
+                    Approval Date
+                  </span>
+
+                  <strong>
+                    {{ current.approvalDate }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    File Name
+                  </span>
+
+                  <strong>
+                    {{ current.attachment.fileName }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Notes
+                  </span>
+
+                  <strong>
+                    {{
+                      current.attachment.notes ||
+                      'No notes'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div class="document-actions">
+
+                <button
+                  *ngIf="
+                    isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    previewPdf(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Preview PDF
+                </button>
+
+
+                <button
+                  *ngIf="
+                    !isPdf(
+                      current.attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    openAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Open
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    downloadAttachment(
+                      current.attachment.attachmentId,
+                      current.attachment.fileName
+                    )
+                  "
+                >
+                  Download
+                </button>
+
+              </div>
+
+            </div>
+
+          </ng-container>
+
+
+          <!-- Empty -->
+
+          <div
+            *ngIf="
+              !technicalDocs
+                .currentApprovedMoaValidation
+            "
+            class="empty-document"
+          >
+
+            <div class="empty-document-icon">
+              MOA
+            </div>
+
+            <strong>
+              No approved MOA + Validation
+            </strong>
+
+            <span>
+              No MOA and validation approval has been added yet.
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-primary empty-action"
+              (click)="openCreationModal()"
+            >
+              Add First Approval
+            </button>
+
+          </div>
+
+
+          <!-- History -->
+
+          <div
+            *ngIf="
+              technicalDocs
+                .approvedMoaValidationHistory
+                .length > 0
+            "
+            class="history-section"
+          >
+
+            <div class="subsection-divider">
+
+              <span>
+                Approval History
+              </span>
+
+            </div>
+
+
+            <div class="history-list">
+
+              <div
+                class="history-row"
+                *ngFor="
+                  let item
+                  of technicalDocs
+                    .approvedMoaValidationHistory;
+                  let first = first
+                "
+              >
+
+                <div class="history-document-icon">
+                  MOA
+                </div>
+
+
+                <div class="history-main">
+
+                  <div class="history-name-row">
+
+                    <strong>
+                      {{ item.attachment.fileName }}
+                    </strong>
+
+                    <span
+                      *ngIf="first"
+                      class="current-badge"
+                    >
+                      Current
+                    </span>
+
+                  </div>
+
+
+                  <span>
+                    Approved:
+                    {{ item.approvalDate }}
+                  </span>
+
+
+                  <small
+                    *ngIf="
+                      item.attachment.notes
+                    "
+                  >
+                    {{ item.attachment.notes }}
+                  </small>
+
+                </div>
+
+
+                <div class="history-actions">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      previewPdf(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Preview
+                  </button>
+
+
+                  <button
+                    *ngIf="
+                      !isPdf(
+                        item.attachment.fileName
+                      )
+                    "
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      openAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Open
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="history-action"
+                    (click)="
+                      downloadAttachment(
+                        item.attachment.attachmentId,
+                        item.attachment.fileName
+                      )
+                    "
+                  >
+                    Download
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+    </ng-container>
+
+  </ng-container>
+
+
+  <!-- ===================================================== -->
+  <!-- CREATE APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      creationModalOpen &&
+      technicalDocs
+    "
+    class="app-modal-overlay"
+    (click)="closeCreationModal()"
+  >
+
+    <div
+      class="app-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- ================================================= -->
+      <!-- Modal Header -->
+      <!-- ================================================= -->
+
+      <header class="app-modal-header">
+
+        <div class="modal-title-wrapper">
+
+          <div class="modal-document-icon">
+
+            {{
+              activeTab === 'specifications'
+                ? 'SP'
+                : activeTab === 'composition'
+                  ? 'CP'
+                  : 'MOA'
+            }}
+
+          </div>
+
+
+          <div>
+
+            <span class="card-eyebrow">
+              New Technical Approval
+            </span>
+
+            <h3>
+
+              {{
+                activeTab === 'specifications'
+                  ? 'Add Approved Specifications'
+                  : activeTab === 'composition'
+                    ? 'Add Approved Composition'
+                    : 'Add Approved MOA + Validation'
+              }}
+
+            </h3>
+
+            <p>
+              Upload the approved document and define
+              the official approval date.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          [disabled]="saving"
+          (click)="closeCreationModal()"
+        >
+          ✕
+        </button>
+
+      </header>
+
+
+      <!-- ================================================= -->
+      <!-- Modal Body -->
+      <!-- ================================================= -->
+
+      <div class="app-modal-body">
+
+
+        <!-- =============================================== -->
+        <!-- Specifications Form -->
+        <!-- =============================================== -->
+
+        <ng-container
+          *ngIf="
+            activeTab === 'specifications'
+          "
+        >
+
+          <div class="field">
+
+            <label>
+              Approval Date
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                specificationsApprovalDate
+              "
+              [disabled]="saving"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Approval Document
+            </label>
+
+            <label class="modal-file-picker">
+
+              <input
+                type="file"
+                [disabled]="saving"
+                (change)="
+                  onSpecificationsFileSelected(
+                    $event
+                  )
+                "
+              />
+
+
+              <div class="upload-icon">
+                ↑
+              </div>
+
+
+              <div class="upload-information">
+
+                <strong>
+                  {{
+                    specificationsFile?.name ||
+                    'Choose specifications document'
+                  }}
+                </strong>
+
+                <span>
+                  Click to select a document from your computer
+                </span>
+
+              </div>
+
+            </label>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Notes
+            </label>
+
+            <textarea
+              rows="4"
+              [(ngModel)]="
+                specificationsNotes
+              "
+              placeholder="Optional notes about this approval..."
+              [disabled]="saving"
+            ></textarea>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- =============================================== -->
+        <!-- Composition Form -->
+        <!-- =============================================== -->
+
+        <ng-container
+          *ngIf="
+            activeTab === 'composition'
+          "
+        >
+
+          <div class="field">
+
+            <label>
+              Approval Date
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                compositionApprovalDate
+              "
+              [disabled]="saving"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Approval Document
+            </label>
+
+            <label class="modal-file-picker">
+
+              <input
+                type="file"
+                [disabled]="saving"
+                (change)="
+                  onCompositionFileSelected(
+                    $event
+                  )
+                "
+              />
+
+
+              <div class="upload-icon">
+                ↑
+              </div>
+
+
+              <div class="upload-information">
+
+                <strong>
+                  {{
+                    compositionFile?.name ||
+                    'Choose composition document'
+                  }}
+                </strong>
+
+                <span>
+                  Click to select a document from your computer
+                </span>
+
+              </div>
+
+            </label>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Notes
+            </label>
+
+            <textarea
+              rows="4"
+              [(ngModel)]="
+                compositionNotes
+              "
+              placeholder="Optional notes about this approval..."
+              [disabled]="saving"
+            ></textarea>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- =============================================== -->
+        <!-- MOA Form -->
+        <!-- =============================================== -->
+
+        <ng-container
+          *ngIf="
+            activeTab === 'moa-validation'
+          "
+        >
+
+          <div class="field">
+
+            <label>
+              Approval Date
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                moaValidationApprovalDate
+              "
+              [disabled]="saving"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Approval Document
+            </label>
+
+            <label class="modal-file-picker">
+
+              <input
+                type="file"
+                [disabled]="saving"
+                (change)="
+                  onMoaValidationFileSelected(
+                    $event
+                  )
+                "
+              />
+
+
+              <div class="upload-icon">
+                ↑
+              </div>
+
+
+              <div class="upload-information">
+
+                <strong>
+                  {{
+                    moaValidationFile?.name ||
+                    'Choose MOA + Validation document'
+                  }}
+                </strong>
+
+                <span>
+                  Click to select a document from your computer
+                </span>
+
+              </div>
+
+            </label>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Notes
+            </label>
+
+            <textarea
+              rows="4"
+              [(ngModel)]="
+                moaValidationNotes
+              "
+              placeholder="Optional notes about this approval..."
+              [disabled]="saving"
+            ></textarea>
+
+          </div>
+
+        </ng-container>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- Modal Footer -->
+      <!-- ================================================= -->
+
+      <footer class="app-modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="saving"
+          (click)="closeCreationModal()"
+        >
+          Cancel
+        </button>
+
+
+        <!-- Specifications -->
+
+        <button
+          *ngIf="
+            activeTab === 'specifications'
+          "
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !specificationsApprovalDate ||
+            !specificationsFile
+          "
+          (click)="
+            addApprovedSpecifications()
+          "
+        >
+
+          <span
+            *ngIf="saving"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving
+              ? 'Adding...'
+              : 'Add Specifications Approval'
+          }}
+
+        </button>
+
+
+        <!-- Composition -->
+
+        <button
+          *ngIf="
+            activeTab === 'composition'
+          "
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !compositionApprovalDate ||
+            !compositionFile
+          "
+          (click)="
+            addApprovedComposition()
+          "
+        >
+
+          <span
+            *ngIf="saving"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving
+              ? 'Adding...'
+              : 'Add Composition Approval'
+          }}
+
+        </button>
+
+
+        <!-- MOA -->
+
+        <button
+          *ngIf="
+            activeTab === 'moa-validation'
+          "
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !moaValidationApprovalDate ||
+            !moaValidationFile
+          "
+          (click)="
+            addApprovedMoaValidation()
+          "
+        >
+
+          <span
+            *ngIf="saving"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving
+              ? 'Adding...'
+              : 'Add MOA + Validation Approval'
+          }}
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PDF Viewer -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="pdfViewerOpen"
+    class="pdf-viewer-overlay"
+    (click)="closePdfViewer()"
+  >
+
+    <div
+      class="pdf-viewer"
+      (click)="$event.stopPropagation()"
+    >
+
+      <header class="pdf-viewer-header">
+
+        <div>
+
+          <strong>
+            {{ pdfViewerFileName }}
+          </strong>
+
+          <span>
+            Document Preview
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="pdf-close-button" aria-label="Close document preview"
+          (click)="closePdfViewer()"
+        >
+          ✕ Close
+        </button>
+
+      </header>
+
+
+      <div
+        *ngIf="pdfViewerLoading"
+        class="pdf-viewer-loading"
+      >
+
+        <div class="spinner"></div>
+
+        Loading document...
+
+      </div>
+
+
+      <iframe
+        *ngIf="
+          !pdfViewerLoading &&
+          pdfViewerUrl
+        "
+        class="pdf-frame"
+        [src]="pdfViewerUrl"
+        [title]="pdfViewerFileName"
+      >
+      </iframe>
+
+    </div>
+
+  </div>
+
+</section>

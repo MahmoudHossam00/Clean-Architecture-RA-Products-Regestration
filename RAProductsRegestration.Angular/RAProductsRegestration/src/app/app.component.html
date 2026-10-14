@@ -1,0 +1,42 @@
+<div class="application">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="topbar">
+    <a class="brand" routerLink="/products" aria-label="RA Workspace — Products home">
+      <span class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none">
+          <path d="M14 3 24 7v7c0 6-10 11-10 11S4 20 4 14V7L14 3Z" stroke="currentColor" stroke-width="1.6" />
+          <path d="M14 9v10M9 14h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>RA Workspace</strong>
+        <span>Products Registration</span>
+      </span>
+    </a>
+
+    <nav class="top-navigation" aria-label="Main navigation">
+      <a routerLink="/products" routerLinkActive="active" ariaCurrentWhenActive="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        Products
+      </a>
+    </nav>
+
+    <div class="workspace-label">
+      <span>Regulatory Affairs</span>
+      <span class="workspace-mark" aria-hidden="true">RA</span>
+    </div>
+  </header>
+
+  <main id="main-content" class="application-content" tabindex="-1">
+    <router-outlet />
+  </main>
+
+  <footer class="application-footer">
+    <span>RA Workspace <span aria-hidden="true">/</span> Products Registration</span>
+    <span>Regulatory Affairs</span>
+  </footer>
+</div>

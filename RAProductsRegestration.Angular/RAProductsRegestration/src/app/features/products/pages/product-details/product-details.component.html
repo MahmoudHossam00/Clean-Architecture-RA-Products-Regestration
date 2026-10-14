@@ -1,0 +1,73 @@
+<div class="page-container">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a routerLink="/products"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6-6 6 6 6"/></svg>Products</a>
+    <span class="breadcrumb-divider" aria-hidden="true">/</span>
+    <span aria-current="page">Product workspace</span>
+  </nav>
+
+  <section class="product-header-card card" aria-labelledby="product-name">
+    <div class="product-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg></div>
+    <div class="product-heading">
+      <span class="heading-label">Product record</span>
+      <h1 id="product-name">{{ product?.productName || 'Product details' }}</h1>
+      <dl class="product-metadata">
+        <div *ngIf="product"><dt>Product code</dt><dd class="code-value">{{ product.productCode || '—' }}</dd></div>
+        <div *ngIf="product"><dt>CTD ID</dt><dd>{{ product.ctdId }}</dd></div>
+        <div *ngIf="product" class="company-metadata"><dt>Company</dt><dd>{{ product.companyName || '—' }}</dd></div>
+        <div *ngIf="!product"><dt>Product ID</dt><dd class="code-value">{{ productId }}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="workspace">
+    <aside class="side-navigation card">
+      <div class="navigation-heading"><h2>Product sections</h2><span>7</span></div>
+      <nav aria-label="Product sections" class="section-groups">
+        <div class="nav-group">
+          <h3>Product information</h3>
+          <div class="nav-links">
+            <a class="nav-item" [routerLink]="['basic-data']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6m-6 4h6m-6 4h4"/></svg>
+              <span><strong>Basic data</strong><small>Identity &amp; registration</small></span>
+            </a>
+            <a class="nav-item" [routerLink]="['technical-docs']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5M9 12h6m-6 4h6"/></svg>
+              <span><strong>Technical documents</strong><small>Specifications &amp; composition</small></span>
+            </a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <h3>Registration lifecycle</h3>
+          <div class="nav-links">
+            <a class="nav-item" [routerLink]="['license']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8.5 11.5 2.5 2.5 4.5-5"/></svg>
+              <span><strong>Product license</strong><small>License &amp; requirements</small></span>
+            </a>
+            <a class="nav-item" [routerLink]="['variations']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 10a8 8 0 0 0-14-5L3 8m0-5v5h5M4 14a8 8 0 0 0 14 5l3-3m0 5v-5h-5"/></svg>
+              <span><strong>Variations</strong><small>Changes &amp; approvals</small></span>
+            </a>
+            <a class="nav-item" [routerLink]="['appeals']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v17m-5 1h10M4 7h16M6 7l-3 7h6L6 7Zm12 0-3 7h6l-3-7Z"/></svg>
+              <span><strong>Appeals</strong><small>Decisions &amp; follow-up</small></span>
+            </a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <h3>Other approvals</h3>
+          <div class="nav-links">
+            <a class="nav-item" [routerLink]="['promotional-materials']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m14 5 6-2v16l-6-3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h9V5ZM14 7v9M6 16l1 5h4l-1-5"/></svg>
+              <span><strong>Promotional materials</strong><small>Materials &amp; approvals</small></span>
+            </a>
+            <a class="nav-item" [routerLink]="['miscellaneous-approvals']" routerLinkActive="active" ariaCurrentWhenActive="page">
+              <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="m8 14 3 3 5-6"/></svg>
+              <span><strong>Miscellaneous approvals</strong><small>Additional requirements</small></span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <div class="product-content"><router-outlet /></div>
+  </div>
+</div>

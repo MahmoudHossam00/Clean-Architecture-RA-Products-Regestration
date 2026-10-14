@@ -1,0 +1,141 @@
+<div class="lookup">
+
+  <label *ngIf="label" [for]="inputId">
+    {{ label }}
+  </label>
+
+
+  <div
+    class="lookup-input-wrapper"
+    [class.disabled]="disabled"
+  >
+
+    <input
+      [id]="inputId"
+      role="combobox"
+      aria-autocomplete="list"
+      [attr.aria-label]="label || placeholder"
+      [attr.aria-expanded]="opened && !disabled"
+      [attr.aria-controls]="opened && !disabled ? inputId + '-options' : null"
+      [attr.aria-activedescendant]="opened && activeIndex >= 0 ? inputId + '-option-' + activeIndex : null"
+      type="text"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [value]="
+        opened
+          ? searchText
+          : selectedItem?.name || ''
+      "
+      (focus)="focus()"
+      (blur)="closeLater()"
+      (input)="onSearch($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      autocomplete="off"
+    />
+
+
+    <button
+      *ngIf="selectedId && !disabled"
+      type="button"
+      class="clear-button"
+      aria-label="Clear selection"
+      (mousedown)="$event.preventDefault()"
+      (click)="clear()"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div
+    *ngIf="opened && !disabled"
+    class="lookup-dropdown"
+    [id]="inputId + '-options'"
+    role="listbox"
+    [attr.aria-label]="label || placeholder"
+  >
+
+    <!-- Existing matches -->
+
+    <button
+      *ngFor="
+        let item
+        of filteredItems; let index = index
+      "
+      type="button"
+      class="lookup-option"
+      role="option"
+      tabindex="-1"
+      [id]="inputId + '-option-' + index"
+      [attr.aria-selected]="item.id === selectedId"
+      [class.keyboard-active]="index === activeIndex"
+      [class.selected]="
+        item.id === selectedId
+      "
+      (mousedown)="$event.preventDefault()"
+      (click)="select(item)"
+    >
+
+      <span>
+        {{ item.name }}
+      </span>
+
+      <span
+        *ngIf="
+          item.id === selectedId
+        "
+        class="selected-check"
+      >
+        ✓
+      </span>
+
+    </button>
+
+
+    <!-- Nothing found -->
+
+    <div
+      *ngIf="
+        filteredItems.length === 0 &&
+        !canCreate
+      "
+      class="no-results"
+    >
+      No matching options
+    </div>
+
+
+    <!-- Create new -->
+
+    <button
+      *ngIf="canCreate"
+      type="button"
+      class="lookup-option create-option"
+      role="option"
+      tabindex="-1"
+      [id]="inputId + '-option-' + filteredItems.length"
+      [attr.aria-selected]="false"
+      [class.keyboard-active]="activeIndex === filteredItems.length"
+      [disabled]="creating"
+      (mousedown)="$event.preventDefault()"
+      (click)="create()"
+    >
+
+      <span class="create-icon">
+        +
+      </span>
+
+      <span *ngIf="!creating">
+        Create "{{ searchText.trim() }}"
+      </span>
+
+      <span *ngIf="creating">
+        Creating...
+      </span>
+
+    </button>
+
+  </div>
+
+</div>

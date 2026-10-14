@@ -1,0 +1,14 @@
+/* Layout specific to this registration section. Shared patterns live in app/shared-workspace.css. */
+.license-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.license-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.license-information-card { padding: 24px; }
+.license-edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1100px) {
+.license-summary-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+.license-form-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+.license-edit-grid { grid-template-columns: 1fr; }
+}

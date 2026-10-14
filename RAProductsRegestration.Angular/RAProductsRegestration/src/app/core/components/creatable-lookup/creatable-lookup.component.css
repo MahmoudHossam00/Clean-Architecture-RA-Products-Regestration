@@ -1,0 +1,19 @@
+:host { display: block; min-width: 0; }
+.lookup { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.lookup > label { color: var(--text-primary); font-size: 13px; font-weight: 600; }
+.lookup-input-wrapper { position: relative; }
+.lookup-input-wrapper input { width: 100%; min-height: 44px; padding: 10px 40px 10px 12px; border: 1px solid var(--border-dark); border-radius: 8px; outline: none; background: var(--surface); color: var(--text-primary); font-size: 14px; transition: border-color var(--transition), box-shadow var(--transition); }
+.lookup-input-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgb(8 127 140 / 12%); }
+.lookup-input-wrapper.disabled input { background: var(--surface-secondary); color: var(--text-muted); cursor: not-allowed; }
+.clear-button { position: absolute; top: 50%; right: 6px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; transform: translateY(-50%); border: 0; border-radius: 6px; background: transparent; color: var(--text-secondary); font-size: 20px; }
+.clear-button:hover { background: var(--primary-light); color: var(--primary-dark); }
+.lookup-dropdown { position: absolute; z-index: 110; top: calc(100% + 6px); left: 0; right: 0; max-height: 280px; overflow-y: auto; padding: 6px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-md); }
+.lookup-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 42px; padding: 10px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--text-primary); text-align: left; font-size: 14px; overflow-wrap: anywhere; }
+.lookup-option:hover, .lookup-option.keyboard-active { background: var(--primary-light); color: var(--primary-dark); }
+.lookup-option.keyboard-active { box-shadow: inset 0 0 0 1px var(--primary); }
+.lookup-option.selected { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+.selected-check { color: var(--primary); font-weight: 700; }
+.create-option { justify-content: flex-start; margin-top: 5px; border-top: 1px solid var(--border); border-radius: 0 0 6px 6px; color: var(--primary-dark); font-weight: 600; }
+.create-option:disabled { opacity: .6; }
+.create-icon { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 6px; background: var(--primary-light); color: var(--primary); font-size: 18px; }
+.no-results { padding: 18px 12px; color: var(--text-secondary); text-align: center; font-size: 13px; }

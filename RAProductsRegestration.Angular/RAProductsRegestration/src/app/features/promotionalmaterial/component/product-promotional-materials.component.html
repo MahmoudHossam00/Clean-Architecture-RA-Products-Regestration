@@ -1,0 +1,1629 @@
+<section class="promotional-page" [attr.aria-busy]="loading" aria-label="Promotional material">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-eyebrow">
+        Registration
+      </span>
+
+      <h2>
+        Promotional Material
+      </h2>
+
+      <p>
+        Manage promotional files, material types,
+        authority approvals and approval expiry dates.
+      </p>
+
+    </div>
+
+
+    <div class="page-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="loading || saving"
+        (click)="load()">
+        Refresh
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="saving"
+        (click)="openCreateModal()">
+        + Add Promotional Material
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Messages -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorMessage"
+    class="message error-message" role="alert">
+
+    <span class="message-icon">
+      !
+    </span>
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="successMessage"
+    class="message success-message" role="status">
+
+    <span class="message-icon">
+      ✓
+    </span>
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Loading -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="loading"
+    class="card loading-card" role="status">
+
+    <div class="spinner"></div>
+
+    <div>
+
+      <strong>
+        Loading promotional materials
+      </strong>
+
+      <span>
+        Please wait...
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Empty -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      !materials.length
+    "
+    class="card empty-state">
+
+    <div class="empty-icon">
+      PM
+    </div>
+
+    <h3>
+      No Promotional Materials
+    </h3>
+
+    <p>
+      No promotional materials have been
+      added for this product.
+    </p>
+
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="openCreateModal()">
+      + Add First Promotional Material
+    </button>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Promotional Materials -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      materials.length
+    "
+    class="card materials-section">
+
+    <!-- =================================================== -->
+    <!-- Section Header -->
+    <!-- =================================================== -->
+
+    <div class="materials-header">
+
+      <button
+        type="button"
+        class="section-title-button"
+        (click)="toggleMaterialsSection()">
+
+        <span
+          class="expand-chevron"
+          [class.expanded]="
+            materialsSectionExpanded
+          ">
+          ›
+        </span>
+
+
+        <div>
+
+          <span class="page-eyebrow">
+            Product Promotional Materials
+          </span>
+
+
+          <div class="title-with-count">
+
+            <h3>
+              Promotional Materials
+            </h3>
+
+
+            <span class="materials-count">
+              {{ materials.length }}
+            </span>
+
+          </div>
+
+
+          <p>
+            Promotional files and regulatory approvals.
+          </p>
+
+        </div>
+
+      </button>
+
+
+      <div class="materials-header-actions">
+
+        <span class="summary-badge approved">
+
+          ✓
+          {{ approvedCount }}
+          Approved
+
+        </span>
+
+
+        <span class="summary-badge pending">
+
+          !
+          {{ pendingCount }}
+          Pending
+
+        </span>
+
+
+        <span
+          *ngIf="expiredCount"
+          class="summary-badge expired">
+
+          !
+          {{ expiredCount }}
+          Expired
+
+        </span>
+
+
+        <button
+          *ngIf="materialsSectionExpanded"
+          type="button"
+          class="btn btn-secondary small"
+          (click)="toggleAllMaterials()">
+
+          {{
+            allMaterialsExpanded
+              ? 'Collapse All'
+              : 'Expand All'
+          }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          (click)="toggleMaterialsSection()">
+
+          {{
+            materialsSectionExpanded
+              ? 'Collapse'
+              : 'Expand'
+          }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="saving"
+          (click)="openCreateModal()">
+
+          + Add Material
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- Material List -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="materialsSectionExpanded"
+      class="materials-body">
+
+      <div class="materials-list">
+
+        <article
+          *ngFor="
+            let material
+            of materials;
+            let index = index
+          "
+          class="material-card"
+          [class.expanded]="
+            isMaterialExpanded(
+              material.id
+            )
+          ">
+
+          <!-- ============================================= -->
+          <!-- Compact Header -->
+          <!-- ============================================= -->
+
+          <div class="material-card-header">
+
+            <button
+              type="button"
+              class="material-title-button"
+              (click)="
+                toggleMaterial(
+                  material.id
+                )
+              ">
+
+              <span
+                class="material-chevron"
+                [class.expanded]="
+                  isMaterialExpanded(
+                    material.id
+                  )
+                ">
+                ›
+              </span>
+
+
+              <div class="material-number">
+                {{ index + 1 }}
+              </div>
+
+
+              <div class="material-title">
+
+                <span class="material-label">
+                  Promotional Material {{ index + 1 }}
+                </span>
+
+
+                <h4>
+                  {{ material.type.name }}
+                </h4>
+
+
+                <div class="material-quick-info">
+
+                  <span>
+
+                    File:
+
+                    <strong>
+                      {{
+                        material
+                          .materialFile
+                          .fileName
+                      }}
+                    </strong>
+
+                  </span>
+
+
+                  <span
+                    *ngIf="
+                      material.approval
+                    ">
+
+                    Approved:
+
+                    <strong>
+                      {{ material.approval.date }}
+                    </strong>
+
+                  </span>
+
+
+                  <span
+                    *ngIf="
+                      material.approvalExpiryDate
+                    ">
+
+                    Expires:
+
+                    <strong>
+                      {{ material.approvalExpiryDate }}
+                    </strong>
+
+                  </span>
+
+
+                  <span
+                    *ngIf="
+                      material.materialFile.notes
+                    "
+                    class="quick-note">
+
+                    📝 Notes
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </button>
+
+
+            <div class="material-header-actions">
+
+              <span
+                class="material-status"
+                [class.approved]="
+                  getStatus(material) ===
+                  'Approved'
+                "
+                [class.expired]="
+                  getStatus(material) ===
+                  'Expired'
+                ">
+
+                {{ getStatus(material) }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="btn btn-secondary small"
+                (click)="
+                  toggleMaterial(
+                    material.id
+                  )
+                ">
+
+                {{
+                  isMaterialExpanded(
+                    material.id
+                  )
+                    ? 'Hide Details'
+                    : 'View Details'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- Expanded Body -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="
+              isMaterialExpanded(
+                material.id
+              )
+            "
+            class="material-body">
+
+            <!-- =========================================== -->
+            <!-- Type -->
+            <!-- =========================================== -->
+
+            <section class="detail-card">
+
+              <div class="detail-card-header">
+
+                <div>
+
+                  <span class="detail-eyebrow">
+                    Classification
+                  </span>
+
+                  <h5>
+                    Promotional Material Type
+                  </h5>
+
+                </div>
+
+              </div>
+
+
+              <div class="type-editor">
+
+                <div class="type-control">
+
+                  <app-creatable-lookup
+                    placeholder="Search or create promotional material type..."
+                    [items]="promotionalMaterialTypes"
+                    [(selectedId)]="
+                      materialTypeSelections[
+                        material.id
+                      ]
+                    "
+                    [disabled]="
+                      saving ||
+                      loadingTypes
+                    "
+                    [creating]="creatingType"
+                    (createRequested)="
+                      createPromotionalMaterialType(
+                        $event,
+                        material.id
+                      )
+                    ">
+                  </app-creatable-lookup>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  [disabled]="
+                    saving ||
+                    !materialTypeSelections[
+                      material.id
+                    ] ||
+                    materialTypeSelections[
+                      material.id
+                    ] ===
+                      material.type.id
+                  "
+                  (click)="
+                    saveMaterialType(
+                      material.id
+                    )
+                  ">
+                  Save Type
+                </button>
+
+              </div>
+
+            </section>
+
+
+            <!-- =========================================== -->
+            <!-- File + Approval -->
+            <!-- =========================================== -->
+
+            <div class="details-grid">
+
+              <!-- ========================================= -->
+              <!-- Material File -->
+              <!-- ========================================= -->
+
+              <section class="detail-card">
+
+                <div class="detail-card-header">
+
+                  <div>
+
+                    <span class="detail-eyebrow">
+                      Promotional File
+                    </span>
+
+                    <h5>
+                      Material File
+                    </h5>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    [disabled]="saving"
+                    (click)="
+                      openReplaceFileModal(
+                        material
+                      )
+                    ">
+                    Replace
+                  </button>
+
+                </div>
+
+
+                <div class="file-information">
+
+                  <div class="file-icon">
+                    DOC
+                  </div>
+
+
+                  <div>
+
+                    <strong>
+                      {{
+                        material
+                          .materialFile
+                          .fileName
+                      }}
+                    </strong>
+
+                    <span>
+                      {{
+                        material
+                          .materialFile
+                          .notes ||
+                        'No file notes'
+                      }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="document-actions">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        material
+                          .materialFile
+                          .fileName
+                      )
+                    "
+                    type="button"
+                    class="btn btn-secondary small"
+                    (click)="
+                      previewPdf(
+                        material
+                          .materialFile
+                          .attachmentId,
+
+                        material
+                          .materialFile
+                          .fileName
+                      )
+                    ">
+                    Preview
+                  </button>
+
+
+                  <button
+                    *ngIf="
+                      !isPdf(
+                        material
+                          .materialFile
+                          .fileName
+                      )
+                    "
+                    type="button"
+                    class="btn btn-secondary small"
+                    (click)="
+                      openAttachment(
+                        material
+                          .materialFile
+                          .attachmentId,
+
+                        material
+                          .materialFile
+                          .fileName
+                      )
+                    ">
+                    Open
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    (click)="
+                      downloadAttachment(
+                        material
+                          .materialFile
+                          .attachmentId,
+
+                        material
+                          .materialFile
+                          .fileName
+                      )
+                    ">
+                    Download
+                  </button>
+
+                </div>
+
+              </section>
+
+
+              <!-- ========================================= -->
+              <!-- Approval -->
+              <!-- ========================================= -->
+
+              <section
+                class="detail-card"
+                [class.approved-detail]="
+                  material.approval &&
+                  !isExpired(
+                    material.approvalExpiryDate
+                  )
+                "
+                [class.expired-detail]="
+                  material.approval &&
+                  isExpired(
+                    material.approvalExpiryDate
+                  )
+                ">
+
+                <div class="detail-card-header">
+
+                  <div>
+
+                    <span class="detail-eyebrow">
+                      Authority Decision
+                    </span>
+
+                    <h5>
+                      Promotional Material Approval
+                    </h5>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-primary small"
+                    [disabled]="saving"
+                    (click)="
+                      openApprovalModal(
+                        material
+                      )
+                    ">
+
+                    {{
+                      material.approval
+                        ? 'Update Approval'
+                        : '+ Approve'
+                    }}
+
+                  </button>
+
+                </div>
+
+
+                <!-- Existing Approval -->
+
+                <ng-container
+                  *ngIf="
+                    material.approval
+                      as approval
+                  ">
+
+                  <div class="approval-status-row">
+
+                    <span
+                      class="approval-status-pill"
+                      [class.expired]="
+                        isExpired(
+                          material.approvalExpiryDate
+                        )
+                      ">
+
+                      {{
+                        isExpired(
+                          material.approvalExpiryDate
+                        )
+                          ? 'Expired'
+                          : 'Approved'
+                      }}
+
+                    </span>
+
+                  </div>
+
+
+                  <div class="approval-grid">
+
+                    <div>
+
+                      <span>
+                        Approval Date
+                      </span>
+
+                      <strong>
+                        {{ approval.date }}
+                      </strong>
+
+                    </div>
+
+
+                    <div>
+
+                      <span>
+                        Approval Expiry
+                      </span>
+
+                      <strong>
+                        {{
+                          material
+                            .approvalExpiryDate
+                        }}
+                      </strong>
+
+                    </div>
+
+
+                    <div class="full">
+
+                      <span>
+                        Approval File
+                      </span>
+
+                      <strong>
+                        {{
+                          approval
+                            .attachment
+                            .fileName
+                        }}
+                      </strong>
+
+                    </div>
+
+
+                    <div
+                      *ngIf="
+                        approval
+                          .attachment
+                          .notes
+                      "
+                      class="full">
+
+                      <span>
+                        Approval Notes
+                      </span>
+
+                      <p>
+                        {{
+                          approval
+                            .attachment
+                            .notes
+                        }}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="document-actions">
+
+                    <button
+                      *ngIf="
+                        isPdf(
+                          approval
+                            .attachment
+                            .fileName
+                        )
+                      "
+                      type="button"
+                      class="btn btn-secondary small"
+                      (click)="
+                        previewPdf(
+                          approval
+                            .attachment
+                            .attachmentId,
+
+                          approval
+                            .attachment
+                            .fileName
+                        )
+                      ">
+                      Preview
+                    </button>
+
+
+                    <button
+                      *ngIf="
+                        !isPdf(
+                          approval
+                            .attachment
+                            .fileName
+                        )
+                      "
+                      type="button"
+                      class="btn btn-secondary small"
+                      (click)="
+                        openAttachment(
+                          approval
+                            .attachment
+                            .attachmentId,
+
+                          approval
+                            .attachment
+                            .fileName
+                        )
+                      ">
+                      Open
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="btn btn-secondary small"
+                      (click)="
+                        downloadAttachment(
+                          approval
+                            .attachment
+                            .attachmentId,
+
+                          approval
+                            .attachment
+                            .fileName
+                        )
+                      ">
+                      Download
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="btn btn-danger-outline small"
+                      [disabled]="saving"
+                      (click)="
+                        removeApproval(
+                          material
+                        )
+                      ">
+                      Remove Approval
+                    </button>
+
+                  </div>
+
+                </ng-container>
+
+
+                <!-- Pending -->
+
+                <div
+                  *ngIf="
+                    !material.approval
+                  "
+                  class="approval-empty">
+
+                  <div class="approval-empty-icon">
+                    APR
+                  </div>
+
+                  <strong>
+                    Approval Pending
+                  </strong>
+
+                  <span>
+                    No authority approval has
+                    been recorded yet.
+                  </span>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-primary small"
+                    (click)="
+                      openApprovalModal(
+                        material
+                      )
+                    ">
+                    + Add Approval
+                  </button>
+
+                </div>
+
+              </section>
+
+            </div>
+
+
+            <!-- =========================================== -->
+            <!-- Footer -->
+            <!-- =========================================== -->
+
+            <footer class="material-footer">
+
+              <button
+                type="button"
+                class="btn btn-danger small"
+                [disabled]="saving"
+                (click)="
+                  deleteMaterial(
+                    material
+                  )
+                ">
+                Delete Promotional Material
+              </button>
+
+            </footer>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CREATE MATERIAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="createModalOpen"
+    class="modal-overlay"
+    (click)="closeCreateModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            New Promotional Material
+          </span>
+
+          <h3>
+            Add Promotional Material
+          </h3>
+
+          <p>
+            Select a material type and
+            upload the promotional file.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeCreateModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <!-- Type -->
+
+        <div class="field">
+
+          <label>
+            Promotional Material Type
+            <span class="required">*</span>
+          </label>
+
+
+          <app-creatable-lookup
+            placeholder="Search or create promotional material type..."
+            [items]="promotionalMaterialTypes"
+            [(selectedId)]="createTypeId"
+            [disabled]="
+              saving ||
+              loadingTypes
+            "
+            [creating]="creatingType"
+            (createRequested)="
+              createPromotionalMaterialType(
+                $event
+              )
+            ">
+          </app-creatable-lookup>
+
+
+          <small class="field-help">
+            Search an existing type or
+            type a new value to create it.
+          </small>
+
+        </div>
+
+
+        <!-- Material File -->
+
+        <div class="field">
+
+          <label>
+            Promotional Material File
+            <span class="required">*</span>
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onCreateFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  createFile?.name ||
+                  'Choose promotional material file'
+                }}
+              </strong>
+
+              <span>
+                Select the material document.
+              </span>
+
+            </div>
+
+          </label>
+
+
+          <button
+            *ngIf="createFile"
+            type="button"
+            class="remove-file-button"
+            (click)="removeCreateFile()">
+            Remove selected file
+          </button>
+
+        </div>
+
+
+        <!-- File Notes -->
+
+        <div class="field">
+
+          <label>
+            Material File Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="createFileNotes"
+            placeholder="Optional notes related to this material file..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="saving"
+          (click)="closeCreateModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            creatingType ||
+            !createTypeId ||
+            !createFile
+          "
+          (click)="createMaterial()">
+
+          {{
+            saving
+              ? 'Creating...'
+              : 'Add Promotional Material'
+          }}
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REPLACE FILE MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      replaceFileModalOpen &&
+      replaceFileTarget
+    "
+    class="modal-overlay"
+    (click)="closeReplaceFileModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Promotional Material
+          </span>
+
+          <h3>
+            Replace Material File
+          </h3>
+
+          <p>
+            {{ replaceFileTarget.type.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeReplaceFileModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            New Material File
+            <span class="required">*</span>
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onReplaceFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  replaceFile?.name ||
+                  'Choose replacement file'
+                }}
+              </strong>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            File Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="replaceFileNotes"
+            placeholder="Optional notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="saving"
+          (click)="closeReplaceFileModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !replaceFile
+          "
+          (click)="saveReplacementFile()">
+
+          Save Replacement
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      approvalModalOpen &&
+      approvalTarget
+    "
+    class="modal-overlay"
+    (click)="closeApprovalModal()">
+
+    <div
+      class="modal approval-modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Authority Approval
+          </span>
+
+          <h3>
+
+            {{
+              approvalTarget.approval
+                ? 'Update Promotional Material Approval'
+                : 'Approve Promotional Material'
+            }}
+
+          </h3>
+
+          <p>
+            {{ approvalTarget.type.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeApprovalModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="approval-date-grid">
+
+          <div class="field">
+
+            <label>
+              Approval Date
+              <span class="required">*</span>
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="approvalDate"
+              [disabled]="saving" />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Approval Expiry Date
+              <span class="required">*</span>
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="approvalExpiryDate"
+              [disabled]="saving" />
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="
+            approvalDate &&
+            approvalExpiryDate &&
+            approvalExpiryDate < approvalDate
+          "
+          class="validation-message">
+
+          Approval expiry date cannot
+          be before approval date.
+
+        </div>
+
+
+        <!-- Approval File -->
+
+        <div class="field">
+
+          <label>
+
+            Approval File
+
+            <span
+              *ngIf="
+                !approvalTarget.approval
+              "
+              class="required">
+              *
+            </span>
+
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onApprovalFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+
+                {{
+                  approvalFile?.name ||
+                  (
+                    approvalTarget.approval
+                      ? approvalTarget
+                          .approval
+                          .attachment
+                          .fileName
+                      : 'Choose approval file'
+                  )
+                }}
+
+              </strong>
+
+
+              <span>
+
+                {{
+                  approvalTarget.approval
+                    ? 'Leave unchanged to keep the current approval file.'
+                    : 'Approval file is required.'
+                }}
+
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <!-- Approval Notes -->
+
+        <div class="field">
+
+          <label>
+            Approval File Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="approvalNotes"
+            placeholder="Optional notes related to the approval file..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="saving"
+          (click)="closeApprovalModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !approvalDate ||
+            !approvalExpiryDate ||
+            approvalExpiryDate < approvalDate ||
+            (
+              !approvalTarget.approval &&
+              !approvalFile
+            )
+          "
+          (click)="saveApproval()">
+
+          {{
+            saving
+              ? 'Saving...'
+              : approvalTarget.approval
+                ? 'Update Approval'
+                : 'Approve Material'
+          }}
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PDF VIEWER -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="pdfViewerOpen"
+    class="pdf-overlay"
+    (click)="closePdfViewer()">
+
+    <div
+      class="pdf-viewer"
+      (click)="$event.stopPropagation()">
+
+      <header class="pdf-header">
+
+        <div>
+
+          <strong>
+            {{ pdfViewerFileName }}
+          </strong>
+
+          <span>
+            Document Preview
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          (click)="closePdfViewer()">
+          ✕ Close
+        </button>
+
+      </header>
+
+
+      <div
+        *ngIf="pdfViewerLoading"
+        class="pdf-loading">
+
+        <div class="spinner"></div>
+
+        Loading document...
+
+      </div>
+
+
+      <iframe
+        *ngIf="
+          !pdfViewerLoading &&
+          pdfViewerUrl
+        "
+        class="pdf-frame"
+        [src]="pdfViewerUrl"
+        [title]="pdfViewerFileName">
+      </iframe>
+
+    </div>
+
+  </div>
+
+</section>

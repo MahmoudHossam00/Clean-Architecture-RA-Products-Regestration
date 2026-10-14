@@ -1,0 +1,77 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Regulatory workspace</div>
+      <h1 class="page-title">Products</h1>
+      <p class="page-description">Find a product and manage its registration, documents, and approvals.</p>
+    </div>
+    <div class="product-count" *ngIf="!errorMessage" aria-live="polite">
+      <span class="count-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg>
+      </span>
+      <div><strong>{{ loading ? '…' : (totalCount | number) }}</strong><span>Products found</span></div>
+    </div>
+  </header>
+
+  <section class="products-card card" aria-labelledby="directory-title" [attr.aria-busy]="loading">
+    <div class="directory-header">
+      <div><h2 id="directory-title">Product directory</h2><p>Your product records, in one place.</p></div>
+      <span class="directory-caption">Select a product to get started</span>
+    </div>
+
+    <form class="search-form" (ngSubmit)="search()" role="search">
+      <div class="search-field">
+        <label for="product-search">Find a product</label>
+        <div class="search-input-wrap">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input id="product-search" name="productSearch" class="search-input" type="search" [(ngModel)]="filter" placeholder="Search by product name, code, or company" [disabled]="loading" />
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit" [disabled]="loading">Search products</button>
+      <button *ngIf="filter" class="btn btn-secondary" type="button" (click)="clearSearch()" [disabled]="loading">Clear</button>
+    </form>
+
+    <div *ngIf="errorMessage && !loading" class="directory-state error-state" role="alert">
+      <span class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 3v1"/></svg></span>
+      <h3>Products could not be loaded</h3>
+      <p>Please try again to retrieve your product records.</p>
+      <button type="button" class="btn btn-secondary" (click)="loadProducts()">Try again</button>
+    </div>
+
+    <div *ngIf="loading" class="directory-state" role="status">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <h3>Loading your products</h3>
+      <p>Retrieving the latest product records.</p>
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && products.length === 0" class="directory-state" role="status">
+      <span class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></span>
+      <h3>{{ filter ? 'No matching products' : 'No products yet' }}</h3>
+      <p>{{ filter ? 'Try another product name, code, or company, or clear your search.' : 'Product records will appear here when they are available.' }}</p>
+      <button *ngIf="filter" type="button" class="btn btn-secondary" (click)="clearSearch()">Clear search</button>
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && products.length > 0" class="table-wrapper" role="region" aria-label="Product directory results" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Product name</th><th scope="col">Product code</th><th scope="col">Company</th><th scope="col">CTD ID</th><th scope="col" class="action-column"><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let product of products">
+            <td><div class="product-name">{{ product.productName }}</div></td>
+            <td><span class="product-code">{{ product.productCode || '—' }}</span></td>
+            <td><span class="company-name">{{ product.companyName || '—' }}</span></td>
+            <td><span class="ctd-badge">{{ product.ctdId }}</span></td>
+            <td class="action-column"><button class="btn small open-button" type="button" (click)="openProduct(product)" [attr.aria-label]="'Open ' + product.productName">Open<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer *ngIf="!loading && !errorMessage && totalCount > 0" class="pagination">
+      <div class="pagination-info">Showing <strong>{{ products.length }}</strong> of <strong>{{ totalCount | number }}</strong> products<span class="page-position">Page {{ pageNumber }} of {{ totalPages }}</span></div>
+      <div class="pagination-actions" aria-label="Product result pages">
+        <button class="btn btn-secondary" type="button" (click)="previousPage()" [disabled]="pageNumber <= 1"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6-6 6 6 6"/></svg>Previous</button>
+        <button class="btn btn-secondary" type="button" (click)="nextPage()" [disabled]="pageNumber >= totalPages">Next<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 6 6 6-6 6"/></svg></button>
+      </div>
+    </footer>
+  </section>
+</div>

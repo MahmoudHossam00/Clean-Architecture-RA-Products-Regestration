@@ -1,0 +1,2899 @@
+<section class="variations-page" [attr.aria-busy]="loading" aria-label="Product variations">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-eyebrow">
+        Registration
+      </span>
+
+      <h2>
+        Product Variations
+      </h2>
+
+      <p>
+        Manage regulatory variations, deadlines,
+        approvals and variation requirements.
+      </p>
+
+    </div>
+
+
+    <div class="page-header-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="loading || saving"
+        (click)="load()">
+        Refresh
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="saving"
+        (click)="openCreateModal()">
+        + Add Variation
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Messages -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorMessage"
+    class="message error-message" role="alert">
+
+    <span class="message-icon">
+      !
+    </span>
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="successMessage"
+    class="message success-message" role="status">
+
+    <span class="message-icon">
+      ✓
+    </span>
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Loading -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="loading"
+    class="card loading-card" role="status">
+
+    <div class="spinner"></div>
+
+    <div>
+
+      <strong>
+        Loading variations
+      </strong>
+
+      <span>
+        Please wait...
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Empty -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      !variations.length
+    "
+    class="card empty-variations">
+
+    <div class="empty-icon">
+      VAR
+    </div>
+
+    <h3>
+      No Variations
+    </h3>
+
+    <p>
+      No regulatory variations have been added
+      for this product yet.
+    </p>
+
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="openCreateModal()">
+      + Add First Variation
+    </button>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Existing Variations -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading &&
+      variations.length
+    ">
+
+    <!-- =================================================== -->
+    <!-- Variation Tabs -->
+    <!-- =================================================== -->
+
+    <section class="variation-tabs-wrapper">
+
+      <div class="variation-tabs">
+
+        <button
+          *ngFor="
+            let variation of variations;
+            let index = index
+          "
+          type="button"
+          class="variation-tab"
+          [attr.aria-pressed]="
+            selectedVariationId ===
+            variation.id
+          "
+          [class.active]="
+            selectedVariationId ===
+            variation.id
+          "
+          (click)="
+            selectVariation(
+              variation.id
+            )
+          ">
+
+          <span class="variation-tab-number">
+            {{ index + 1 }}
+          </span>
+
+
+          <span class="variation-tab-content">
+
+            <strong>
+              Variation {{ index + 1 }}
+            </strong>
+
+            <small>
+              {{ variation.initiator }}
+            </small>
+
+          </span>
+
+
+          <span
+            class="variation-tab-status"
+            [class.approved]="
+              variation.approval
+            ">
+
+            {{
+              variation.approval
+                ? 'Approved'
+                : 'Pending'
+            }}
+
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="variation-tab add-tab"
+          [disabled]="saving"
+          (click)="openCreateModal()">
+
+          <span class="variation-tab-number">
+            +
+          </span>
+
+          <span class="variation-tab-content">
+
+            <strong>
+              Add Variation
+            </strong>
+
+            <small>
+              Create another variation
+            </small>
+
+          </span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- Selected Variation -->
+    <!-- =================================================== -->
+
+    <ng-container
+      *ngIf="
+        selectedVariation
+          as variation
+      ">
+
+      <!-- ================================================= -->
+      <!-- Summary -->
+      <!-- ================================================= -->
+
+      <section class="variation-summary-grid">
+
+        <article class="card summary-card">
+
+          <div class="summary-icon">
+            BY
+          </div>
+
+          <div>
+
+            <span>
+              Initiator
+            </span>
+
+            <strong>
+              {{ variation.initiator }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="card summary-card">
+
+          <div class="summary-icon">
+            DUE
+          </div>
+
+          <div>
+
+            <span>
+              Deadline
+            </span>
+
+            <strong>
+              {{ variation.deadline }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="card summary-card">
+
+          <div
+            class="summary-icon"
+            [class.approved-icon]="
+              variation.approval
+            ">
+            APR
+          </div>
+
+          <div>
+
+            <span>
+              Status
+            </span>
+
+            <strong>
+              {{
+                variation.approval
+                  ? 'Approved'
+                  : 'Pending Approval'
+              }}
+            </strong>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Variation Information -->
+      <!-- ================================================= -->
+
+      <section class="card variation-info-card">
+
+        <div class="section-card-header collapsible-header">
+
+          <button
+            type="button"
+            class="section-title-button"
+            (click)="toggleVariationInfo()">
+
+            <span
+              class="expand-chevron"
+              [class.expanded]="
+                variationInfoExpanded
+              ">
+              ›
+            </span>
+
+
+            <div>
+
+              <span class="page-eyebrow">
+                Variation Details
+              </span>
+
+              <h3>
+                Variation Information
+              </h3>
+
+
+              <p
+                *ngIf="
+                  !variationInfoExpanded
+                "
+                class="collapsed-summary">
+
+                {{ variation.initiator }}
+                ·
+                {{
+                  variation.cause
+                }}
+
+              </p>
+
+            </div>
+
+          </button>
+
+
+          <div class="section-actions">
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleVariationInfo()">
+
+              {{
+                variationInfoExpanded
+                  ? 'Collapse'
+                  : 'Expand'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              [disabled]="saving"
+              (click)="openEditDetailsModal()">
+              Edit Details
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="variationInfoExpanded"
+          class="collapsible-content">
+
+          <div class="info-grid">
+
+            <div class="info-item">
+
+              <span>
+                Initiator
+              </span>
+
+              <strong>
+                {{ variation.initiator }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item full">
+
+              <span>
+                Cause
+              </span>
+
+              <p>
+                {{ variation.cause }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Deadline + Approval -->
+      <!-- ================================================= -->
+
+      <section class="variation-two-column">
+
+        <!-- =============================================== -->
+        <!-- Deadline -->
+        <!-- =============================================== -->
+
+        <article class="card action-card">
+
+          <div class="section-card-header collapsible-header">
+
+            <button
+              type="button"
+              class="section-title-button"
+              (click)="toggleDeadline()">
+
+              <span
+                class="expand-chevron"
+                [class.expanded]="
+                  deadlineExpanded
+                ">
+                ›
+              </span>
+
+
+              <div>
+
+                <span class="page-eyebrow">
+                  Time Limit
+                </span>
+
+                <h3>
+                  Variation Deadline
+                </h3>
+
+
+                <p
+                  *ngIf="
+                    !deadlineExpanded
+                  "
+                  class="collapsed-summary">
+
+                  Due:
+                  {{ variation.deadline }}
+
+                  <ng-container
+                    *ngIf="
+                      variation.deadlineNote
+                    ">
+                    ·
+                    {{ variation.deadlineNote }}
+                  </ng-container>
+
+                </p>
+
+              </div>
+
+            </button>
+
+
+            <div class="section-actions">
+
+              <button
+                type="button"
+                class="btn btn-secondary small"
+                (click)="toggleDeadline()">
+
+                {{
+                  deadlineExpanded
+                    ? 'Collapse'
+                    : 'Expand'
+                }}
+
+              </button>
+
+
+              <button
+                type="button"
+                class="btn btn-secondary small"
+                [disabled]="saving"
+                (click)="openDeadlineModal()">
+                Edit
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="deadlineExpanded"
+            class="collapsible-content">
+
+            <div class="deadline-date">
+              {{ variation.deadline }}
+            </div>
+
+
+            <div
+              *ngIf="variation.deadlineNote"
+              class="deadline-note">
+
+              <span>
+                Deadline Note
+              </span>
+
+              <p>
+                {{ variation.deadlineNote }}
+              </p>
+
+            </div>
+
+
+            <div
+              *ngIf="!variation.deadlineNote"
+              class="muted-empty">
+
+              No deadline notes.
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- =============================================== -->
+        <!-- Approval -->
+        <!-- =============================================== -->
+
+        <article
+          class="card action-card"
+          [class.approval-card]="
+            variation.approval
+          ">
+
+          <div class="section-card-header collapsible-header">
+
+            <button
+              type="button"
+              class="section-title-button"
+              (click)="toggleVariationApproval()">
+
+              <span
+                class="expand-chevron"
+                [class.expanded]="
+                  variationApprovalExpanded
+                ">
+                ›
+              </span>
+
+
+              <div>
+
+                <span class="page-eyebrow">
+                  Authority Decision
+                </span>
+
+                <h3>
+                  Variation Approval
+                </h3>
+
+
+                <p
+                  *ngIf="
+                    !variationApprovalExpanded
+                  "
+                  class="collapsed-summary">
+
+                  {{
+                    variation.approval
+                      ? 'Approved on ' +
+                        variation.approval.date
+                      : 'Approval pending'
+                  }}
+
+                </p>
+
+              </div>
+
+            </button>
+
+
+            <div class="section-actions">
+
+              <span
+                class="section-status"
+                [class.approved]="
+                  variation.approval
+                ">
+
+                {{
+                  variation.approval
+                    ? 'Approved'
+                    : 'Pending'
+                }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="btn btn-secondary small"
+                (click)="toggleVariationApproval()">
+
+                {{
+                  variationApprovalExpanded
+                    ? 'Collapse'
+                    : 'Expand'
+                }}
+
+              </button>
+
+
+              <button
+                type="button"
+                class="btn btn-primary small"
+                [disabled]="saving"
+                (click)="openVariationApprovalModal()">
+
+                {{
+                  variation.approval
+                    ? 'Update Approval'
+                    : '+ Approve'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="variationApprovalExpanded"
+            class="collapsible-content">
+
+            <ng-container
+              *ngIf="
+                variation.approval
+                  as approval
+              ">
+
+              <div class="approval-badge">
+                Approved
+              </div>
+
+
+              <div class="approval-info-grid">
+
+                <div>
+
+                  <span>
+                    Approval Date
+                  </span>
+
+                  <strong>
+                    {{ approval.date }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Approval File
+                  </span>
+
+                  <strong>
+                    {{
+                      approval
+                        .attachment
+                        .fileName
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div
+                *ngIf="
+                  approval.attachment.notes
+                "
+                class="approval-notes">
+
+                {{
+                  approval
+                    .attachment
+                    .notes
+                }}
+
+              </div>
+
+
+              <div class="document-actions">
+
+                <button
+                  *ngIf="
+                    isPdf(
+                      approval
+                        .attachment
+                        .fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    previewPdf(
+                      approval
+                        .attachment
+                        .attachmentId,
+
+                      approval
+                        .attachment
+                        .fileName
+                    )
+                  ">
+                  Preview
+                </button>
+
+
+                <button
+                  *ngIf="
+                    !isPdf(
+                      approval
+                        .attachment
+                        .fileName
+                    )
+                  "
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    openAttachment(
+                      approval
+                        .attachment
+                        .attachmentId,
+
+                      approval
+                        .attachment
+                        .fileName
+                    )
+                  ">
+                  Open
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    downloadAttachment(
+                      approval
+                        .attachment
+                        .attachmentId,
+
+                      approval
+                        .attachment
+                        .fileName
+                    )
+                  ">
+                  Download
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-danger-outline small"
+                  [disabled]="saving"
+                  (click)="removeVariationApproval()">
+                  Remove Approval
+                </button>
+
+              </div>
+
+            </ng-container>
+
+
+            <div
+              *ngIf="!variation.approval"
+              class="approval-empty">
+
+              <div class="approval-empty-icon">
+                APR
+              </div>
+
+              <strong>
+                Not approved yet
+              </strong>
+
+              <span>
+                Add the authority approval date
+                and approval document.
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Requirements -->
+      <!-- ================================================= -->
+
+      <section class="card requirements-section">
+
+        <div class="section-card-header collapsible-header">
+
+          <button
+            type="button"
+            class="section-title-button"
+            (click)="toggleRequirementsSection()">
+
+            <span
+              class="expand-chevron"
+              [class.expanded]="
+                requirementsExpanded
+              ">
+              ›
+            </span>
+
+
+            <div>
+
+              <span class="page-eyebrow">
+                Variation Follow-up
+              </span>
+
+
+              <div class="title-with-count">
+
+                <h3>
+                  Variation Requirements
+                </h3>
+
+                <span class="requirements-count">
+                  {{ variation.requirements.length }}
+                </span>
+
+              </div>
+
+
+              <p>
+                Track requirements, deadlines,
+                responsible departments and approvals.
+              </p>
+
+            </div>
+
+          </button>
+
+
+          <div class="requirements-header-actions">
+
+            <span
+              class="requirement-summary-badge approved">
+
+              ✓
+              {{ approvedRequirementsCount }}
+              Approved
+
+            </span>
+
+
+            <span
+              class="requirement-summary-badge pending">
+
+              !
+              {{ pendingRequirementsCount }}
+              Pending
+
+            </span>
+
+
+            <span
+              class="requirement-summary-badge documents">
+
+              📎
+              {{ requirementsWithAttachmentsCount }}
+              Files
+
+            </span>
+
+
+            <button
+              *ngIf="
+                requirementsExpanded &&
+                variation.requirements.length
+              "
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleAllRequirements()">
+
+              {{
+                allRequirementsExpanded
+                  ? 'Collapse All'
+                  : 'Expand All'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleRequirementsSection()">
+
+              {{
+                requirementsExpanded
+                  ? 'Collapse'
+                  : 'Expand'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="saving"
+              (click)="openAddRequirementModal()">
+
+              + Add Requirement
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- Expanded Requirements Section -->
+        <!-- =============================================== -->
+
+        <div
+          *ngIf="requirementsExpanded"
+          class="collapsible-content">
+
+          <!-- Empty -->
+
+          <div
+            *ngIf="
+              !variation.requirements.length
+            "
+            class="requirements-empty">
+
+            <div class="empty-icon">
+              REQ
+            </div>
+
+            <strong>
+              No Requirements
+            </strong>
+
+            <span>
+              This variation currently has no requirements.
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-primary small"
+              (click)="openAddRequirementModal()">
+              Add First Requirement
+            </button>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- Requirement List -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="
+              variation.requirements.length
+            "
+            class="requirements-list">
+
+            <article
+              *ngFor="
+                let requirement
+                of variation.requirements;
+                let index = index
+              "
+              class="requirement-card"
+              [class.expanded]="
+                isRequirementExpanded(
+                  requirement.id
+                )
+              ">
+
+              <!-- ========================================= -->
+              <!-- Always Visible Requirement Header -->
+              <!-- ========================================= -->
+
+              <div class="requirement-card-header">
+
+                <button
+                  type="button"
+                  class="requirement-title-button"
+                  (click)="
+                    toggleRequirement(
+                      requirement.id
+                    )
+                  ">
+
+                  <span
+                    class="requirement-chevron"
+                    [class.expanded]="
+                      isRequirementExpanded(
+                        requirement.id
+                      )
+                    ">
+                    ›
+                  </span>
+
+
+                  <div class="requirement-number">
+                    {{ index + 1 }}
+                  </div>
+
+
+                  <div class="requirement-title">
+
+                    <span class="requirement-label">
+                      Requirement {{ index + 1 }}
+                    </span>
+
+                    <h4>
+                      {{ requirement.name }}
+                    </h4>
+
+
+                    <div class="requirement-quick-info">
+
+                      <span>
+
+                        Due:
+
+                        <strong>
+                          {{ requirement.deadline }}
+                        </strong>
+
+                      </span>
+
+
+                      <span>
+
+                        Department:
+
+                        <strong>
+                          {{
+                            requirement
+                              .responsibleDepartment
+                              .name
+                          }}
+                        </strong>
+
+                      </span>
+
+
+                      <span
+                        *ngIf="
+                          requirement
+                            .requirementAttachment
+                        "
+                        class="quick-file">
+
+                        📎 Document
+
+                      </span>
+
+
+                      <span
+                        *ngIf="
+                          requirement.notes
+                        "
+                        class="quick-note">
+
+                        📝 Notes
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </button>
+
+
+                <div class="requirement-header-actions">
+
+                  <span
+                    class="requirement-status"
+                    [class.approved]="
+                      requirement.approval
+                    ">
+
+                    {{
+                      requirement.approval
+                        ? 'Approved'
+                        : 'Pending'
+                    }}
+
+                  </span>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    (click)="
+                      toggleRequirement(
+                        requirement.id
+                      )
+                    ">
+
+                    {{
+                      isRequirementExpanded(
+                        requirement.id
+                      )
+                        ? 'Hide Details'
+                        : 'View Details'
+                    }}
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    [disabled]="saving"
+                    (click)="
+                      openEditRequirementModal(
+                        requirement
+                      )
+                    ">
+                    Edit
+                  </button>
+
+                </div>
+
+              </div>
+
+
+              <!-- ========================================= -->
+              <!-- Expanded Requirement -->
+              <!-- ========================================= -->
+
+              <div
+                *ngIf="
+                  isRequirementExpanded(
+                    requirement.id
+                  )
+                "
+                class="requirement-body">
+
+                <!-- Metadata -->
+
+                <div class="requirement-metadata">
+
+                  <div>
+
+                    <span>
+                      Deadline
+                    </span>
+
+                    <strong>
+                      {{ requirement.deadline }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Responsible Department
+                    </span>
+
+                    <strong>
+                      {{
+                        requirement
+                          .responsibleDepartment
+                          .name
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <!-- Notes -->
+
+                <div
+                  *ngIf="requirement.notes"
+                  class="requirement-notes">
+
+                  <span>
+                    Requirement Notes
+                  </span>
+
+                  <p>
+                    {{ requirement.notes }}
+                  </p>
+
+                </div>
+
+
+                <!-- ======================================= -->
+                <!-- Attachment + Approval -->
+                <!-- ======================================= -->
+
+                <div class="requirement-detail-grid">
+
+                  <!-- ===================================== -->
+                  <!-- Attachment -->
+                  <!-- ===================================== -->
+
+                  <div class="requirement-detail-card">
+
+                    <div class="requirement-detail-header">
+
+                      <div>
+
+                        <span>
+                          Supporting Document
+                        </span>
+
+                        <strong>
+                          Requirement Attachment
+                        </strong>
+
+                      </div>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary small"
+                        [disabled]="saving"
+                        (click)="
+                          openRequirementAttachmentModal(
+                            requirement
+                          )
+                        ">
+
+                        {{
+                          requirement.requirementAttachment
+                            ? 'Replace'
+                            : '+ Add'
+                        }}
+
+                      </button>
+
+                    </div>
+
+
+                    <ng-container
+                      *ngIf="
+                        requirement.requirementAttachment
+                          as attachment
+                      ">
+
+                      <div class="file-row">
+
+                        <div class="file-icon">
+                          DOC
+                        </div>
+
+
+                        <div class="file-details">
+
+                          <strong>
+                            {{ attachment.fileName }}
+                          </strong>
+
+                          <small>
+                            {{
+                              attachment.notes ||
+                              'No attachment notes'
+                            }}
+                          </small>
+
+                        </div>
+
+                      </div>
+
+
+                      <div class="document-actions">
+
+                        <button
+                          *ngIf="
+                            isPdf(
+                              attachment.fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            previewPdf(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Preview
+                        </button>
+
+
+                        <button
+                          *ngIf="
+                            !isPdf(
+                              attachment.fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            openAttachment(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Open
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            downloadAttachment(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Download
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-danger-outline small"
+                          [disabled]="saving"
+                          (click)="
+                            removeRequirementAttachment(
+                              requirement
+                            )
+                          ">
+                          Remove
+                        </button>
+
+                      </div>
+
+                    </ng-container>
+
+
+                    <div
+                      *ngIf="
+                        !requirement.requirementAttachment
+                      "
+                      class="detail-empty">
+
+                      <span class="detail-empty-icon">
+                        📎
+                      </span>
+
+                      No requirement attachment.
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- ===================================== -->
+                  <!-- Requirement Approval -->
+                  <!-- ===================================== -->
+
+                  <div
+                    class="requirement-detail-card"
+                    [class.approved-detail-card]="
+                      requirement.approval
+                    ">
+
+                    <div class="requirement-detail-header">
+
+                      <div>
+
+                        <span>
+                          Authority Decision
+                        </span>
+
+                        <strong>
+                          Requirement Approval
+                        </strong>
+
+                      </div>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-primary small"
+                        [disabled]="saving"
+                        (click)="
+                          openRequirementApprovalModal(
+                            requirement
+                          )
+                        ">
+
+                        {{
+                          requirement.approval
+                            ? 'Update'
+                            : 'Approve'
+                        }}
+
+                      </button>
+
+                    </div>
+
+
+                    <ng-container
+                      *ngIf="
+                        requirement.approval
+                          as approval
+                      ">
+
+                      <div class="approval-info-grid">
+
+                        <div>
+
+                          <span>
+                            Approval Date
+                          </span>
+
+                          <strong>
+                            {{ approval.date }}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Approval File
+                          </span>
+
+                          <strong>
+                            {{
+                              approval
+                                .attachment
+                                .fileName
+                            }}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+
+                      <div
+                        *ngIf="
+                          approval.attachment.notes
+                        "
+                        class="approval-notes">
+
+                        {{
+                          approval
+                            .attachment
+                            .notes
+                        }}
+
+                      </div>
+
+
+                      <div class="document-actions">
+
+                        <button
+                          *ngIf="
+                            isPdf(
+                              approval
+                                .attachment
+                                .fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            previewPdf(
+                              approval
+                                .attachment
+                                .attachmentId,
+
+                              approval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Preview
+                        </button>
+
+
+                        <button
+                          *ngIf="
+                            !isPdf(
+                              approval
+                                .attachment
+                                .fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            openAttachment(
+                              approval
+                                .attachment
+                                .attachmentId,
+
+                              approval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Open
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            downloadAttachment(
+                              approval
+                                .attachment
+                                .attachmentId,
+
+                              approval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Download
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-danger-outline small"
+                          [disabled]="saving"
+                          (click)="
+                            removeRequirementApproval(
+                              requirement
+                            )
+                          ">
+                          Remove Approval
+                        </button>
+
+                      </div>
+
+                    </ng-container>
+
+
+                    <div
+                      *ngIf="
+                        !requirement.approval
+                      "
+                      class="detail-empty">
+
+                      <span class="detail-empty-icon">
+                        ✓
+                      </span>
+
+                      Requirement has not been approved.
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <!-- ======================================= -->
+                <!-- Requirement Footer -->
+                <!-- ======================================= -->
+
+                <footer class="requirement-footer">
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    [disabled]="saving"
+                    (click)="
+                      openEditRequirementModal(
+                        requirement
+                      )
+                    ">
+                    Edit Requirement
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-danger small"
+                    [disabled]="saving"
+                    (click)="
+                      deleteRequirement(
+                        requirement
+                      )
+                    ">
+                    Delete Requirement
+                  </button>
+
+                </footer>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Delete Variation -->
+      <!-- ================================================= -->
+
+      <section class="card danger-zone">
+
+        <div>
+
+          <span class="danger-label">
+            Danger Zone
+          </span>
+
+          <strong>
+            Delete Variation
+          </strong>
+
+          <p>
+            Deleting this variation also deletes all
+            requirements belonging to it.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          [disabled]="saving"
+          (click)="deleteVariation()">
+          Delete Variation
+        </button>
+
+      </section>
+
+    </ng-container>
+
+  </ng-container>
+
+
+  <!-- ===================================================== -->
+  <!-- CREATE VARIATION MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="createModalOpen"
+    class="modal-overlay"
+    (click)="closeCreateModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            New Variation
+          </span>
+
+          <h3>
+            Create Variation
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeCreateModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Variation Initiator
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="createInitiator"
+            placeholder="Enter variation initiator..."
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Cause
+            <span class="required">*</span>
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="createCause"
+            placeholder="Enter variation cause..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Deadline
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="createDeadline"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Deadline Note
+          </label>
+
+          <textarea
+            rows="3"
+            [(ngModel)]="createDeadlineNote"
+            placeholder="Optional deadline note..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeCreateModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !createInitiator.trim() ||
+            !createCause.trim() ||
+            !createDeadline
+          "
+          (click)="createVariation()">
+          Create Variation
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- EDIT DETAILS MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="editDetailsModalOpen"
+    class="modal-overlay"
+    (click)="closeEditDetailsModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Variation
+          </span>
+
+          <h3>
+            Edit Variation Details
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeEditDetailsModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Initiator
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="editInitiator"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Cause
+            <span class="required">*</span>
+          </label>
+
+          <textarea
+            rows="5"
+            [(ngModel)]="editCause"
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeEditDetailsModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !editInitiator.trim() ||
+            !editCause.trim()
+          "
+          (click)="saveVariationDetails()">
+          Save Changes
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- DEADLINE MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="deadlineModalOpen"
+    class="modal-overlay"
+    (click)="closeDeadlineModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Variation
+          </span>
+
+          <h3>
+            Update Deadline
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeDeadlineModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Deadline
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="editDeadline"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Deadline Note
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="editDeadlineNote"
+            placeholder="Optional deadline note..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeDeadlineModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !editDeadline
+          "
+          (click)="saveDeadline()">
+          Save Deadline
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- VARIATION APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      variationApprovalModalOpen &&
+      selectedVariation
+    "
+    class="modal-overlay"
+    (click)="closeVariationApprovalModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Variation Approval
+          </span>
+
+          <h3>
+            {{
+              selectedVariation.approval
+                ? 'Update Variation Approval'
+                : 'Approve Variation'
+            }}
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeVariationApprovalModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Approval Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="variationApprovalDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Document
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onVariationApprovalFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  variationApprovalFile?.name ||
+                  (
+                    selectedVariation.approval
+                      ? selectedVariation
+                          .approval
+                          .attachment
+                          .fileName
+                      : 'Choose approval document'
+                  )
+                }}
+              </strong>
+
+
+              <span>
+                {{
+                  selectedVariation.approval
+                    ? 'Leave unchanged to keep current file.'
+                    : 'Approval document is required.'
+                }}
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="variationApprovalNotes"
+            placeholder="Optional approval notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeVariationApprovalModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !variationApprovalDate ||
+            (
+              !selectedVariation.approval &&
+              !variationApprovalFile
+            )
+          "
+          (click)="saveVariationApproval()">
+          Save Approval
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ADD / EDIT REQUIREMENT MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="requirementModalOpen"
+    class="modal-overlay"
+    (click)="closeRequirementModal()">
+
+    <div
+      class="modal large-modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Variation Requirement
+          </span>
+
+          <h3>
+            {{
+              requirementFormMode === 'add'
+                ? 'Add Requirement'
+                : 'Edit Requirement'
+            }}
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Requirement
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="requirementName"
+            placeholder="Enter requirement..."
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Deadline
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="requirementDeadline"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <!-- Department Search -->
+
+        <div class="field">
+
+          <label>
+            Responsible Department
+            <span class="required">*</span>
+          </label>
+
+
+          <div class="department-search">
+
+            <input
+              type="text"
+              autocomplete="off"
+              [value]="departmentSearch"
+              placeholder="Search department..."
+              [disabled]="saving"
+              (focus)="openDepartmentDropdown()"
+              (input)="
+                onDepartmentSearch(
+                  $any($event.target).value
+                )
+              " />
+
+
+            <div
+              *ngIf="departmentDropdownOpen"
+              class="department-dropdown">
+
+              <div
+                *ngIf="loadingDepartments"
+                class="dropdown-state">
+                Searching departments...
+              </div>
+
+
+              <button
+                *ngFor="
+                  let department
+                  of departments
+                "
+                type="button"
+                class="department-option"
+                (click)="
+                  selectDepartment(
+                    department
+                  )
+                ">
+
+                <span class="department-icon">
+                  DEP
+                </span>
+
+                <strong>
+                  {{ department.name }}
+                </strong>
+
+                <span
+                  *ngIf="
+                    department.id ===
+                    requirementDepartmentId
+                  ">
+                  ✓
+                </span>
+
+              </button>
+
+
+              <div
+                *ngIf="
+                  !loadingDepartments &&
+                  !departments.length
+                "
+                class="dropdown-state">
+                No departments found.
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <small
+            *ngIf="
+              requirementDepartmentId
+            "
+            class="selected-value">
+
+            Selected:
+            {{ requirementDepartmentName }}
+
+          </small>
+
+        </div>
+
+
+        <!-- Initial Attachment -->
+
+        <div
+          *ngIf="
+            requirementFormMode === 'add'
+          "
+          class="field">
+
+          <label>
+
+            Requirement Attachment
+
+            <span class="optional">
+              Optional
+            </span>
+
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementFile?.name ||
+                  'Choose supporting document'
+                }}
+              </strong>
+
+              <span>
+                Optional requirement attachment.
+              </span>
+
+            </div>
+
+          </label>
+
+
+          <button
+            *ngIf="requirementFile"
+            type="button"
+            class="text-danger-button"
+            (click)="removeSelectedRequirementFile()">
+
+            Remove selected file
+
+          </button>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementNotes"
+            placeholder="Optional requirement notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementName.trim() ||
+            !requirementDeadline ||
+            !requirementDepartmentId
+          "
+          (click)="saveRequirement()">
+
+          {{
+            requirementFormMode === 'add'
+              ? 'Add Requirement'
+              : 'Save Changes'
+          }}
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REQUIREMENT ATTACHMENT MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      requirementAttachmentModalOpen &&
+      requirementAttachmentTarget
+    "
+    class="modal-overlay"
+    (click)="closeRequirementAttachmentModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Requirement Attachment
+          </span>
+
+          <h3>
+            {{
+              requirementAttachmentTarget
+                .requirementAttachment
+                ? 'Replace Attachment'
+                : 'Add Attachment'
+            }}
+          </h3>
+
+          <p>
+            {{ requirementAttachmentTarget.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementAttachmentModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Document
+            <span class="required">*</span>
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementAttachmentFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementAttachmentFile?.name ||
+                  'Choose document'
+                }}
+              </strong>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Attachment Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementAttachmentNotes"
+            placeholder="Optional notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementAttachmentModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementAttachmentFile
+          "
+          (click)="saveRequirementAttachment()">
+          Save Attachment
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REQUIREMENT APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      requirementApprovalModalOpen &&
+      requirementApprovalTarget
+    "
+    class="modal-overlay"
+    (click)="closeRequirementApprovalModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Requirement Approval
+          </span>
+
+          <h3>
+            {{
+              requirementApprovalTarget.approval
+                ? 'Update Approval'
+                : 'Approve Requirement'
+            }}
+          </h3>
+
+          <p>
+            {{ requirementApprovalTarget.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementApprovalModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Approval Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="requirementApprovalDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Document
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementApprovalFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementApprovalFile?.name ||
+                  (
+                    requirementApprovalTarget.approval
+                      ? requirementApprovalTarget
+                          .approval
+                          .attachment
+                          .fileName
+                      : 'Choose approval document'
+                  )
+                }}
+              </strong>
+
+
+              <span>
+                {{
+                  requirementApprovalTarget.approval
+                    ? 'Leave unchanged to keep existing document.'
+                    : 'Approval document is required.'
+                }}
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementApprovalNotes"
+            placeholder="Optional approval notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementApprovalModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementApprovalDate ||
+            (
+              !requirementApprovalTarget.approval &&
+              !requirementApprovalFile
+            )
+          "
+          (click)="saveRequirementApproval()">
+          Save Approval
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PDF VIEWER -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="pdfViewerOpen"
+    class="pdf-overlay"
+    (click)="closePdfViewer()">
+
+    <div
+      class="pdf-viewer"
+      (click)="$event.stopPropagation()">
+
+      <header class="pdf-header">
+
+        <div>
+
+          <strong>
+            {{ pdfViewerFileName }}
+          </strong>
+
+          <span>
+            Document Preview
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          (click)="closePdfViewer()">
+          ✕ Close
+        </button>
+
+      </header>
+
+
+      <div
+        *ngIf="pdfViewerLoading"
+        class="pdf-loading">
+
+        <div class="spinner"></div>
+
+        Loading document...
+
+      </div>
+
+
+      <iframe
+        *ngIf="
+          !pdfViewerLoading &&
+          pdfViewerUrl
+        "
+        class="pdf-frame"
+        [src]="pdfViewerUrl">
+      </iframe>
+
+    </div>
+
+  </div>
+
+</section>

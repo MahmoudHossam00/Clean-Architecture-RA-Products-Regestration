@@ -1,0 +1,5381 @@
+<section class="basic-data-page" aria-labelledby="basic-data-title">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <header class="section-header">
+
+    <div class="section-title">
+
+      <span class="section-label">
+        Registration
+      </span>
+
+      <div class="title-row">
+
+        <h2 id="basic-data-title">
+          Product Basic Data
+        </h2>
+
+        <span
+          *ngIf="basicData"
+          class="status-pill created">
+          Created
+        </span>
+
+        <span
+          *ngIf="basicDataMissing"
+          class="status-pill not-created">
+          Not Created
+        </span>
+
+      </div>
+
+      <p *ngIf="basicData">
+        {{ basicData.productCode }}
+        <span class="separator">•</span>
+        {{ basicData.productName }}
+      </p>
+
+      <p *ngIf="basicDataMissing">
+        Create a Product Basic Data record to start
+        maintaining regulatory information.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="loading || saving"
+      (click)="load()">
+      Refresh
+    </button>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Messages -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorMessage"
+    class="message error-message" role="alert">
+
+    <span class="message-icon">
+      !
+    </span>
+
+    <span>
+      {{ errorMessage }}
+    </span>
+
+  </div>
+
+
+  <div
+    *ngIf="successMessage"
+    class="message success-message" role="status">
+
+    <span class="message-icon">
+      ✓
+    </span>
+
+    <span>
+      {{ successMessage }}
+    </span>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Loading -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="loading-card card" role="status" aria-live="polite">
+
+    <div class="spinner"></div>
+
+    <div>
+
+      <strong>
+        Loading Product Basic Data
+      </strong>
+
+      <span>
+        Please wait...
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Product Basic Data Not Created -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      basicDataMissing
+    "
+    class="card create-basic-data-card">
+
+    <div class="create-state-icon">
+      +
+    </div>
+
+
+    <div class="create-state-content">
+
+      <span class="section-label">
+        Initial Setup
+      </span>
+
+      <h3>
+        Create Product Basic Data
+      </h3>
+
+      <p>
+        This product does not have a Product Basic Data
+        record yet. Create one before adding dosage form,
+        storage condition, shelf life, active ingredients,
+        prices, packs, manufacturers and regulatory deadlines.
+      </p>
+
+
+      <div class="create-form">
+
+        <div class="field">
+
+          <label for="createTradeName">
+
+            Trade Name
+
+            <span class="optional-label">
+              Optional
+            </span>
+
+          </label>
+
+          <input
+            id="createTradeName"
+            type="text"
+            [(ngModel)]="createTradeName"
+            placeholder="Enter trade name if applicable"
+            [disabled]="saving" />
+
+          <small>
+            You may leave this empty and update it later.
+          </small>
+
+        </div>
+
+
+        <div class="create-actions">
+
+          <button
+            type="button"
+            class="btn btn-primary create-button"
+            [disabled]="saving"
+            (click)="createBasicData()">
+
+            <span
+              *ngIf="saving"
+              class="button-spinner">
+            </span>
+
+            {{
+              saving
+                ? 'Creating...'
+                : 'Create Product Basic Data'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Product Basic Data Exists -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading &&
+      basicData
+    ">
+
+    <!-- =================================================== -->
+    <!-- Tabs -->
+    <!-- =================================================== -->
+
+    <nav class="basic-data-tabs" role="tablist" aria-label="Product basic data sections" (keydown)="onTabKeydown($event)">
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-general"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'general'"
+        [attr.tabindex]="activeTab === 'general' ? 0 : -1"
+        [class.active]="
+          activeTab === 'general'
+        "
+        (click)="
+          setActiveTab('general')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span>
+
+        <span>
+          General
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-shelf-life"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'shelf-life'"
+        [attr.tabindex]="activeTab === 'shelf-life' ? 0 : -1"
+        [class.active]="
+          activeTab === 'shelf-life'
+        "
+        (click)="
+          setActiveTab('shelf-life')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+
+        <span>
+          Shelf Life
+        </span>
+
+        <span
+          *ngIf="basicData.shelfLife"
+          class="tab-indicator completed">
+          ✓
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-prices"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'prices'"
+        [attr.tabindex]="activeTab === 'prices' ? 0 : -1"
+        [class.active]="
+          activeTab === 'prices'
+        "
+        (click)="
+          setActiveTab('prices')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13l-7 7a2 2 0 0 1-3 0l-7-7V4h9l8 6a2 2 0 0 1 0 3Z"/><circle cx="8" cy="8" r="1"/></svg></span>
+
+        <span>
+          Approved Prices
+        </span>
+
+        <span class="tab-count">
+          {{ basicData.approvedPrices.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-active-ingredients"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'active-ingredients'"
+        [attr.tabindex]="activeTab === 'active-ingredients' ? 0 : -1"
+        [class.active]="
+          activeTab === 'active-ingredients'
+        "
+        (click)="
+          setActiveTab('active-ingredients')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4 19a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2L14 9V3M7 15h10"/></svg></span>
+
+        <span>
+          Active Ingredients
+        </span>
+
+        <span class="tab-count">
+          {{ basicData.activeIngredients.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-approvals"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'approvals'"
+        [attr.tabindex]="activeTab === 'approvals' ? 0 : -1"
+        [class.active]="
+          activeTab === 'approvals'
+        "
+        (click)="
+          setActiveTab('approvals')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5l9 5"/></svg></span>
+
+        <span>
+          Packs & Manufacturers
+        </span>
+
+        <span class="tab-count">
+          {{
+            basicData.approvedPacks.length +
+            basicData.approvedManufacturers.length
+          }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="basic-data-tab"
+        id="pbd-tab-deadlines"
+        role="tab"
+        aria-controls="pbd-tab-panel"
+        [attr.aria-selected]="activeTab === 'deadlines'"
+        [attr.tabindex]="activeTab === 'deadlines' ? 0 : -1"
+        [class.active]="
+          activeTab === 'deadlines'
+        "
+        (click)="
+          setActiveTab('deadlines')
+        ">
+
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 16h3"/></svg></span>
+
+        <span>
+          Deadlines
+        </span>
+
+        <span class="tab-count">
+          {{
+            basicData.pvHistory.length +
+            basicData.decree600History.length
+          }}
+        </span>
+
+      </button>
+
+    </nav>
+
+
+    <!-- =================================================== -->
+    <!-- Orientation Controls -->
+    <!-- =================================================== -->
+
+    <div class="tab-orientation-bar">
+
+      <div class="tab-orientation-copy" aria-live="polite">
+
+        <span class="orientation-label">Section {{ activeTabNumber }} of 6</span>
+
+        <strong>
+          {{ activeTabInformation.title }}
+        </strong>
+
+        <small>
+          {{ activeTabInformation.description }}
+        </small>
+
+      </div>
+
+
+      <div class="tab-orientation-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          [disabled]="currentTabAllExpanded"
+          (click)="expandCurrentTab()">
+          Expand All
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          [disabled]="currentTabAllCollapsed"
+          (click)="collapseCurrentTab()">
+          Collapse All
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- Tab Content -->
+    <!-- =================================================== -->
+
+    <section id="pbd-tab-panel" role="tabpanel" [attr.aria-labelledby]="'pbd-tab-' + activeTab" tabindex="0" [ngSwitch]="activeTab">
+
+
+      <!-- ================================================= -->
+      <!-- GENERAL -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'general'">
+
+        <section class="overview-grid">
+
+          <article class="overview-card card">
+
+            <div class="overview-icon">
+              Rx
+            </div>
+
+            <div>
+
+              <span class="overview-label">
+                Trade Name
+              </span>
+
+              <strong>
+                {{
+                  basicData.tradeName ||
+                  'Not defined'
+                }}
+              </strong>
+
+            </div>
+
+          </article>
+
+
+          <article class="overview-card card">
+
+            <div class="overview-icon">
+              DF
+            </div>
+
+            <div>
+
+              <span class="overview-label">
+                Dosage Form
+              </span>
+
+              <strong>
+                {{
+                  basicData.dosageForm?.name ||
+                  'Not defined'
+                }}
+              </strong>
+
+            </div>
+
+          </article>
+
+
+          <article class="overview-card card">
+
+            <div class="overview-icon">
+              SC
+            </div>
+
+            <div>
+
+              <span class="overview-label">
+                Storage Condition
+              </span>
+
+              <strong>
+                {{
+                  basicData.storageCondition?.name ||
+                  'Not defined'
+                }}
+              </strong>
+
+            </div>
+
+          </article>
+
+
+          <article class="overview-card card">
+
+            <div class="overview-icon">
+              AI
+            </div>
+
+            <div>
+
+              <span class="overview-label">
+                Active Ingredients
+              </span>
+
+              <strong>
+                {{ basicData.activeIngredients.length }}
+              </strong>
+
+            </div>
+
+          </article>
+
+        </section>
+
+
+        <section class="card form-card">
+
+          <button [attr.aria-expanded]="isSectionExpanded('general-information')" aria-controls="pbd-section-general-information"
+            type="button"
+            class="card-header accordion-card-header"
+            [class.expanded]="
+              isSectionExpanded(
+                'general-information'
+              )
+            "
+            (click)="
+              toggleSection(
+                'general-information'
+              )
+            ">
+
+            <div>
+
+              <span class="card-eyebrow">
+                General
+              </span>
+
+              <h3>
+                General Information
+              </h3>
+
+              <p>
+                Main registration and product information.
+              </p>
+
+            </div>
+
+
+            <span class="accordion-indicator">
+
+              <span class="accordion-summary">
+                Identity & product attributes
+              </span>
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'general-information'
+                  )
+                ">
+                ›
+              </span>
+
+            </span>
+
+          </button>
+
+
+          <div id="pbd-section-general-information"
+            *ngIf="
+              isSectionExpanded(
+                'general-information'
+              )
+            "
+            class="form-grid accordion-body">
+
+            <div class="field">
+
+              <label for="pbd-field-1">Trade Name</label>
+
+              <div class="control-with-action">
+
+                <input id="pbd-field-1"
+                  type="text"
+                  [(ngModel)]="tradeName"
+                  placeholder="Trade name" />
+
+                <button
+                  type="button"
+                  class="btn btn-primary field-save-button"
+                  [disabled]="saving"
+                  (click)="saveTradeName()">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Dosage Form
+              </label>
+
+              <div class="control-with-action">
+
+                <div class="control-area">
+
+                  <app-creatable-lookup
+                    placeholder="Search dosage forms..."
+                    [items]="dosageForms"
+                    [(selectedId)]="dosageFormId"
+                    [disabled]="saving"
+                    [creating]="creatingDosageForm"
+                    (createRequested)="
+                      createDosageForm($event)
+                    ">
+                  </app-creatable-lookup>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary field-save-button"
+                  [disabled]="
+                    saving ||
+                    !dosageFormId
+                  "
+                  (click)="saveDosageForm()">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Storage Condition
+              </label>
+
+              <div class="control-with-action">
+
+                <div class="control-area">
+
+                  <app-creatable-lookup
+                    placeholder="Search or create storage condition..."
+                    [items]="storageConditions"
+                    [(selectedId)]="
+                      storageConditionId
+                    "
+                    [disabled]="saving"
+                    [creating]="
+                      creatingStorageCondition
+                    "
+                    (createRequested)="
+                      createStorageCondition(
+                        $event
+                      )
+                    ">
+                  </app-creatable-lookup>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary field-save-button"
+                  [disabled]="saving"
+                  (click)="saveStorageCondition()">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Basic Data ID
+              </label>
+
+              <div class="readonly-value">
+                {{ basicData.id }}
+              </div>
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Physical Description
+              </label>
+
+              <div class="control-with-action textarea-action">
+
+                <textarea
+                  rows="4"
+                  [(ngModel)]="physicalDescription"
+                  placeholder="Enter the approved physical description">
+                </textarea>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary field-save-button"
+                  [disabled]="saving"
+                  (click)="savePhysicalDescription()">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- SHELF LIFE -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'shelf-life'">
+
+        <section class="card form-card">
+
+          <div class="card-header">
+
+  <div>
+
+    <span class="card-eyebrow">
+      Approval
+    </span>
+
+    <h3>
+      Shelf Life
+    </h3>
+
+    <p>
+      Maintain the current approved shelf life,
+      approval date and supporting documents.
+    </p>
+
+  </div>
+
+
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="!basicData.shelfLife"
+    (click)="openShelfLifeHistory()">
+
+    View Shelf Life History
+
+  </button>
+
+</div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('shelf-life-summary')" aria-controls="pbd-section-shelf-life-summary"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'shelf-life-summary'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Current State
+                </span>
+
+                <strong>
+                  Shelf Life Summary
+                </strong>
+
+                <small>
+                  Current approval, duration and document count.
+                </small>
+
+              </div>
+
+
+              <span class="accordion-indicator">
+
+                <span
+                  *ngIf="basicData.shelfLife"
+                  class="summary-chip">
+                  {{
+                    basicData.shelfLife.numberOfMonths
+                  }}
+                  months
+                </span>
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isSectionExpanded(
+                      'shelf-life-summary'
+                    )
+                  ">
+                  ›
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-shelf-life-summary"
+              *ngIf="
+                isSectionExpanded(
+                  'shelf-life-summary'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div
+            *ngIf="basicData.shelfLife as shelfLife"
+            class="approval-summary-grid">
+
+            <div class="approval-summary">
+
+              <span>
+                Approved Shelf Life
+              </span>
+
+              <strong>
+                {{ shelfLife.numberOfMonths }}
+                months
+              </strong>
+
+            </div>
+
+
+            <div class="approval-summary">
+
+              <span>
+                Approval Date
+              </span>
+
+              <strong>
+                {{ shelfLife.approvalDate }}
+              </strong>
+
+            </div>
+
+
+            <div class="approval-summary">
+
+              <span>
+                Supporting Documents
+              </span>
+
+              <strong>
+                {{ shelfLife.attachments.length }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+            <div
+              *ngIf="!basicData.shelfLife"
+              class="mini-empty">
+              Shelf life has not been defined yet.
+            </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('shelf-life-details')" aria-controls="pbd-section-shelf-life-details"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'shelf-life-details'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Approval Data
+                </span>
+
+                <strong>
+                  Shelf Life Details
+                </strong>
+
+                <small>
+                  Maintain number of months and approval date.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'shelf-life-details'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-shelf-life-details"
+              *ngIf="
+                isSectionExpanded(
+                  'shelf-life-details'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label for="pbd-field-2">Number of Months</label>
+
+              <input id="pbd-field-2"
+                type="number"
+                min="1"
+                step="1"
+                [(ngModel)]="
+                  shelfLifeNumberOfMonths
+                "
+                placeholder="Example: 36"
+                [disabled]="saving" />
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="pbd-field-3">Approval Date</label>
+
+              <input id="pbd-field-3"
+                type="date"
+                [(ngModel)]="
+                  shelfLifeApprovalDate
+                "
+                [disabled]="saving" />
+
+            </div>
+
+          </div>
+
+
+            <div class="form-actions">
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="
+                  saving ||
+                  shelfLifeUploading ||
+                  shelfLifeNumberOfMonths === null ||
+                  shelfLifeNumberOfMonths <= 0 ||
+                  !shelfLifeApprovalDate
+                "
+                (click)="saveShelfLife()">
+
+                {{
+                  basicData.shelfLife
+                    ? 'Update Shelf Life'
+                    : 'Save Shelf Life'
+                }}
+
+              </button>
+
+            </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('shelf-life-documents')" aria-controls="pbd-section-shelf-life-documents"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'shelf-life-documents'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Documents
+                </span>
+
+                <strong>
+                  Supporting Documents
+                </strong>
+
+                <small>
+                  Browse the currently linked shelf-life files.
+                </small>
+
+              </div>
+
+
+              <span class="accordion-indicator">
+
+                <span class="summary-chip">
+                  {{ shelfLifeAttachments.length }}
+                </span>
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isSectionExpanded(
+                      'shelf-life-documents'
+                    )
+                  ">
+                  ›
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-shelf-life-documents"
+              *ngIf="
+                isSectionExpanded(
+                  'shelf-life-documents'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div
+            *ngIf="
+              shelfLifeAttachments.length === 0
+            "
+            class="mini-empty">
+            No shelf-life supporting documents have been added.
+          </div>
+
+
+          <div class="simple-list">
+
+            <div
+              class="simple-list-row"
+              *ngFor="
+                let attachment
+                of shelfLifeAttachments
+              ">
+
+              <div>
+
+                <strong>
+                  {{ attachment.fileName }}
+                </strong>
+
+                <small
+                  *ngIf="attachment.notes">
+                  {{ attachment.notes }}
+                </small>
+
+              </div>
+
+
+              <div class="attachment-actions-group">
+
+                <button
+                  *ngIf="
+                    isPdf(
+                      attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="attachment-action"
+                  (click)="
+                    previewPdf(
+                      attachment.attachmentId,
+                      attachment.fileName
+                    )
+                  ">
+                  Preview PDF
+                </button>
+
+
+                <button
+                  *ngIf="
+                    !isPdf(
+                      attachment.fileName
+                    )
+                  "
+                  type="button"
+                  class="attachment-action"
+                  (click)="
+                    openAttachment(
+                      attachment.attachmentId,
+                      attachment.fileName
+                    )
+                  ">
+                  Open
+                </button>
+
+
+                <button
+                  type="button"
+                  class="attachment-action secondary"
+                  (click)="
+                    downloadAttachment(
+                      attachment.attachmentId,
+                      attachment.fileName
+                    )
+                  ">
+                  Download
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-danger small"
+                  [disabled]="
+                    saving ||
+                    shelfLifeUploading
+                  "
+                  (click)="
+                    removeProductShelfLifeAttachment(
+                      attachment.attachmentId
+                    )
+                  ">
+                  Remove
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('shelf-life-add-document')" aria-controls="pbd-section-shelf-life-add-document"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'shelf-life-add-document'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  New File
+                </span>
+
+                <strong>
+                  Add Supporting Document
+                </strong>
+
+                <small>
+                  Upload another supporting attachment.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'shelf-life-add-document'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-shelf-life-add-document"
+              *ngIf="
+                isSectionExpanded(
+                  'shelf-life-add-document'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>
+                Attachment
+              </label>
+
+              <label class="file-picker">
+
+                <input
+                  type="file"
+                  [disabled]="
+                    saving ||
+                    shelfLifeUploading
+                  "
+                  (change)="
+                    onShelfLifeFileSelected(
+                      $event
+                    )
+                  " />
+
+                <span class="file-picker-button">
+                  Choose File
+                </span>
+
+                <span class="file-picker-name">
+                  {{
+                    shelfLifeFile?.name ||
+                    'No file selected'
+                  }}
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="pbd-field-4">Notes</label>
+
+              <input id="pbd-field-4"
+                type="text"
+                [(ngModel)]="
+                  shelfLifeNotes
+                "
+                placeholder="Optional notes for this document"
+                [disabled]="
+                  saving ||
+                  shelfLifeUploading
+                " />
+
+            </div>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              [disabled]="
+                saving ||
+                shelfLifeUploading ||
+                !shelfLifeFile
+              "
+              (click)="
+                addShelfLifeAttachment()
+              ">
+              Add Document
+            </button>
+
+          </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- PRICES -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'prices'">
+
+        <section class="card form-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Commercial
+              </span>
+
+              <h3>
+                Approved Prices
+              </h3>
+
+              <p>
+                Maintain approved pricing history
+                and validity dates.
+              </p>
+
+            </div>
+
+            <span class="count-badge">
+              {{ basicData.approvedPrices.length }}
+            </span>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('prices-current')" aria-controls="pbd-section-prices-current"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'prices-current'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Current
+                </span>
+
+                <strong>
+                  Current Approved Price
+                </strong>
+
+                <small>
+                  Latest approved commercial price.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'prices-current'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-prices-current"
+              *ngIf="
+                isSectionExpanded(
+                  'prices-current'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div
+            *ngIf="
+              currentApprovedPrice as currentPrice
+            "
+            class="approval-summary-grid">
+
+            <div class="approval-summary">
+
+              <span>
+                Current Approved Price
+              </span>
+
+              <strong>
+                {{ currentPrice.price }}
+              </strong>
+
+            </div>
+
+
+            <div class="approval-summary">
+
+              <span>
+                Price Description
+              </span>
+
+              <strong>
+                {{ currentPrice.pricePerDescription }}
+              </strong>
+
+            </div>
+
+
+            <div class="approval-summary">
+
+              <span>
+                Issue Date
+              </span>
+
+              <strong>
+                {{ currentPrice.issueDate }}
+              </strong>
+
+            </div>
+
+
+            <div class="approval-summary">
+
+              <span>
+                Expiry Date
+              </span>
+
+              <strong>
+                {{ currentPrice.expiryDate }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+            <div
+              *ngIf="
+                !currentApprovedPrice
+              "
+              class="mini-empty">
+              No approved price has been added yet.
+            </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('prices-history')" aria-controls="pbd-section-prices-history"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'prices-history'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  History
+                </span>
+
+                <strong>
+                  Approved Price History
+                </strong>
+
+                <small>
+                  Review every stored approved price and validity period.
+                </small>
+
+              </div>
+
+
+              <span class="accordion-indicator">
+
+                <span class="summary-chip">
+                  {{ basicData.approvedPrices.length }}
+                </span>
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isSectionExpanded(
+                      'prices-history'
+                    )
+                  ">
+                  ›
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-prices-history"
+              *ngIf="
+                isSectionExpanded(
+                  'prices-history'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div
+            class="table-wrapper"
+            *ngIf="
+              basicData.approvedPrices.length > 0
+            ">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Price Description</th>
+                  <th>Issue Date</th>
+                  <th>Expiry Date</th>
+                  <th>Reminder</th>
+                  <th class="actions-column">Action</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let price
+                    of basicData.approvedPrices
+                  ">
+
+                  <td>
+                    <strong class="price-value">
+                      {{ price.price }}
+                    </strong>
+                  </td>
+
+                  <td>
+                    {{ price.pricePerDescription }}
+                  </td>
+
+                  <td>
+                    {{ price.issueDate }}
+                  </td>
+
+                  <td>
+                    {{ price.expiryDate }}
+                  </td>
+
+                  <td>
+                    3 months before expiry
+                  </td>
+
+                  <td class="actions-cell">
+
+                    <button
+                      type="button"
+                      class="btn btn-danger small"
+                      [disabled]="saving"
+                      (click)="removePrice(price.id)">
+                      Remove
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+            <div
+              *ngIf="
+                basicData.approvedPrices.length === 0
+              "
+              class="mini-empty">
+              No approved price history.
+            </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('prices-add')" aria-controls="pbd-section-prices-add"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'prices-add'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  New Record
+                </span>
+
+                <strong>
+                  Add New Approved Price
+                </strong>
+
+                <small>
+                  Add a new approved price without replacing previous records.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'prices-add'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-prices-add"
+              *ngIf="
+                isSectionExpanded(
+                  'prices-add'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="price-create-grid">
+
+            <div class="field">
+
+              <label for="pbd-field-5">Price</label>
+
+              <input id="pbd-field-5"
+                type="number"
+                step="0.01"
+                min="0"
+                [(ngModel)]="newPrice" />
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="pbd-field-6">Price Description</label>
+
+              <input id="pbd-field-6"
+                type="text"
+                [(ngModel)]="
+                  newPricePerDescription
+                " />
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="pbd-field-7">Issue Date</label>
+
+              <input id="pbd-field-7"
+                type="date"
+                [(ngModel)]="
+                  newPriceIssueDate
+                " />
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="pbd-field-8">Expiry Date</label>
+
+              <input id="pbd-field-8"
+                type="date"
+                [(ngModel)]="
+                  newPriceExpiryDate
+                " />
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="
+                saving ||
+                newPrice === null ||
+                !newPricePerDescription.trim() ||
+                !newPriceIssueDate ||
+                !newPriceExpiryDate
+              "
+              (click)="addPrice()">
+              Add Price
+            </button>
+
+          </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- ACTIVE INGREDIENTS -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'active-ingredients'">
+
+        <section class="card form-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Composition
+              </span>
+
+              <h3>
+                Active Ingredients
+              </h3>
+
+              <p>
+                Maintain active substances and their
+                regulatory information.
+              </p>
+
+            </div>
+
+
+            <div class="ingredient-header-actions">
+
+              <span class="count-badge">
+                {{ basicData.activeIngredients.length }}
+              </span>
+
+              <button [attr.aria-expanded]="isSectionExpanded('active-ingredients-list')" aria-controls="pbd-section-active-ingredients-list"
+                type="button"
+                class="btn btn-secondary small"
+                (click)="
+                  toggleSection(
+                    'active-ingredients-list'
+                  )
+                ">
+
+                {{
+                  isSectionExpanded(
+                    'active-ingredients-list'
+                  )
+                    ? 'Collapse List'
+                    : 'Expand List'
+                }}
+
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="openAddIngredientModal()">
+                + Add Active Ingredient
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div id="pbd-section-active-ingredients-list"
+            *ngIf="
+              isSectionExpanded(
+                'active-ingredients-list'
+              )
+            "
+            class="accordion-body">
+
+
+          <div
+            *ngIf="
+              basicData.activeIngredients.length === 0
+            "
+            class="empty-state">
+
+            <strong>
+              No active ingredients
+            </strong>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="openAddIngredientModal()">
+              Add Active Ingredient
+            </button>
+
+          </div>
+
+
+          <div class="ingredient-list">
+
+            <article
+              class="ingredient-summary-card"
+              *ngFor="
+                let ingredient
+                of basicData.activeIngredients
+              ">
+
+              <div class="ingredient-summary-header">
+
+                <button [attr.aria-expanded]="isIngredientCardExpanded(ingredient.id)"
+                  type="button"
+                  class="ingredient-card-toggle"
+                  (click)="
+                    toggleIngredientCard(
+                      ingredient.id
+                    )
+                  ">
+
+                  <div class="ingredient-name">
+
+                    <div class="ingredient-avatar">
+                      AI
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {{ ingredient.activeIngredient.name }}
+                      </strong>
+
+                      <span>
+                        Strength:
+                        {{ ingredient.strength }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isIngredientCardExpanded(
+                        ingredient.id
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-secondary small"
+                  (click)="
+                    openIngredientDetails(
+                      ingredient
+                    )
+                  ">
+                  Manage Details
+                </button>
+
+              </div>
+
+
+              <div
+                *ngIf="
+                  isIngredientCardExpanded(
+                    ingredient.id
+                  )
+                "
+                class="ingredient-details">
+
+                <div class="detail-item">
+                  <label>Storage Condition</label>
+                  <span>
+                    {{
+                      ingredient.storageCondition?.name ||
+                      'Not defined'
+                    }}
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <label>Physical Description</label>
+                  <span>
+                    {{
+                      ingredient.physicalDescription ||
+                      'Not defined'
+                    }}
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <label>Shelf Life</label>
+                  <span>
+                    {{
+                      ingredient.shelfLife
+                        ? ingredient.shelfLife.numberOfMonths + ' months'
+                        : 'Not defined'
+                    }}
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <label>Approved Packs</label>
+                  <span>
+                    {{ ingredient.approvedPacks.length }}
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <label>Approved Suppliers</label>
+                  <span>
+                    {{ ingredient.approvedSuppliers.length }}
+                  </span>
+                </div>
+
+              </div>
+
+            </article>
+
+          </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- APPROVALS -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'approvals'">
+
+        <section class="card form-card">
+
+          <div class="card-header">
+
+            <div>
+              <span class="card-eyebrow">
+                Approvals
+              </span>
+
+              <h3>
+                Packs & Manufacturers
+              </h3>
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('approvals-summary')" aria-controls="pbd-section-approvals-summary"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'approvals-summary'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Overview
+                </span>
+
+                <strong>
+                  Approval Summary
+                </strong>
+
+                <small>
+                  Counts for approved packs and finished product manufacturers.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'approvals-summary'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-approvals-summary"
+              *ngIf="
+                isSectionExpanded(
+                  'approvals-summary'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="approval-summary-grid">
+
+            <div class="approval-summary">
+              <span>Approved Packs</span>
+              <strong>
+                {{ basicData.approvedPacks.length }}
+              </strong>
+            </div>
+
+            <div class="approval-summary">
+              <span>Approved Manufacturers</span>
+              <strong>
+                {{ basicData.approvedManufacturers.length }}
+              </strong>
+            </div>
+
+          </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Product Pack Create -->
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('approvals-add-pack')" aria-controls="pbd-section-approvals-add-pack"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'approvals-add-pack'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  New Approval
+                </span>
+
+                <strong>
+                  Add Approved Pack
+                </strong>
+
+                <small>
+                  Register a new approved finished-product pack.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'approvals-add-pack'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-approvals-add-pack"
+              *ngIf="
+                isSectionExpanded(
+                  'approvals-add-pack'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="approval-create-card">
+
+            <h4>
+              Add Approved Pack
+            </h4>
+
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label>Description</label>
+                <input
+                  type="text"
+                  [(ngModel)]="
+                    newApprovedPackDescription
+                  " />
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-9">Approval Date</label>
+                <input id="pbd-field-9"
+                  type="date"
+                  [(ngModel)]="
+                    newApprovedPackApprovalDate
+                  " />
+              </div>
+
+              <div class="field">
+
+                <label>
+                  Attachment
+                </label>
+
+                <label class="file-picker">
+
+                  <input
+                    type="file"
+                    (change)="
+                      onApprovedPackFileSelected(
+                        $event
+                      )
+                    " />
+
+                  <span class="file-picker-button">
+                    Choose File
+                  </span>
+
+                  <span class="file-picker-name">
+                    {{
+                      newApprovedPackFile?.name ||
+                      'No file selected'
+                    }}
+                  </span>
+
+                </label>
+
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-10">Notes</label>
+                <input id="pbd-field-10"
+                  type="text"
+                  [(ngModel)]="
+                    newApprovedPackNotes
+                  " />
+              </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="
+                  saving ||
+                  !newApprovedPackDescription.trim() ||
+                  !newApprovedPackApprovalDate ||
+                  !newApprovedPackFile
+                "
+                (click)="addApprovedPack()">
+                Add Approved Pack
+              </button>
+
+            </div>
+
+          </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('approvals-packs')" aria-controls="pbd-section-approvals-packs"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'approvals-packs'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Current Records
+                </span>
+
+                <strong>
+                  Approved Packs
+                </strong>
+
+                <small>
+                  Browse approved pack records and their approval files.
+                </small>
+
+              </div>
+
+
+              <span class="accordion-indicator">
+
+                <span class="summary-chip">
+                  {{ basicData.approvedPacks.length }}
+                </span>
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isSectionExpanded(
+                      'approvals-packs'
+                    )
+                  ">
+                  ›
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-approvals-packs"
+              *ngIf="
+                isSectionExpanded(
+                  'approvals-packs'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="simple-list">
+
+            <div
+              class="simple-list-row expandable-record-row"
+              *ngFor="
+                let pack
+                of basicData.approvedPacks
+              ">
+
+              <button [attr.aria-expanded]="isApprovedPackCardExpanded(pack.id)"
+                type="button"
+                class="record-summary-toggle"
+                (click)="
+                  toggleApprovedPackCard(
+                    pack.id
+                  )
+                ">
+
+                <div>
+
+                  <strong>
+                    {{ pack.description }}
+                  </strong>
+
+                  <span>
+                    Approval:
+                    {{ pack.approval.date }}
+                  </span>
+
+                </div>
+
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isApprovedPackCardExpanded(
+                      pack.id
+                    )
+                  ">
+                  ›
+                </span>
+
+              </button>
+
+
+              <div
+                *ngIf="
+                  isApprovedPackCardExpanded(
+                    pack.id
+                  )
+                "
+                class="record-expanded-content">
+
+                <div class="record-detail-grid">
+
+                  <div>
+
+                    <span>
+                      Attachment
+                    </span>
+
+                    <strong>
+                      {{
+                        pack.approval
+                          .attachment
+                          .fileName
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    *ngIf="
+                      pack.approval
+                        .attachment
+                        .notes
+                    ">
+
+                    <span>
+                      Notes
+                    </span>
+
+                    <strong>
+                      {{
+                        pack.approval
+                          .attachment
+                          .notes
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div class="attachment-actions-group">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        pack.approval
+                          .attachment
+                          .fileName
+                      )
+                    "
+                    class="pdf-preview-button"
+                    (click)="
+                      previewPdf(
+                        pack.approval.attachment.attachmentId,
+                        pack.approval.attachment.fileName
+                      )
+                    ">
+                    Preview
+                  </button>
+
+
+                  <button
+                    class="pdf-preview-button"
+                    (click)="
+                      downloadAttachment(
+                        pack.approval.attachment.attachmentId,
+                        pack.approval.attachment.fileName
+                      )
+                    ">
+                    Download
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+            <div
+              *ngIf="
+                basicData.approvedPacks.length === 0
+              "
+              class="mini-empty">
+              No approved packs have been added.
+            </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('approvals-add-manufacturer')" aria-controls="pbd-section-approvals-add-manufacturer"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'approvals-add-manufacturer'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  New Approval
+                </span>
+
+                <strong>
+                  Add Approved Manufacturer
+                </strong>
+
+                <small>
+                  Add a finished-product manufacturer approval.
+                </small>
+
+              </div>
+
+
+              <span aria-hidden="true" class="accordion-chevron"
+                [class.expanded]="
+                  isSectionExpanded(
+                    'approvals-add-manufacturer'
+                  )
+                ">
+                ›
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-approvals-add-manufacturer"
+              *ngIf="
+                isSectionExpanded(
+                  'approvals-add-manufacturer'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="approval-create-card">
+
+            <h4>
+              Add Approved Manufacturer
+            </h4>
+
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label for="pbd-field-11">Manufacturer Name</label>
+                <input id="pbd-field-11"
+                  [(ngModel)]="
+                    newManufacturerName
+                  " />
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-12">Approval Date</label>
+                <input id="pbd-field-12"
+                  type="date"
+                  [(ngModel)]="
+                    newManufacturerApprovalDate
+                  " />
+              </div>
+
+              <div class="field">
+
+                <label>
+                  Attachment
+                </label>
+
+                <label class="file-picker">
+
+                  <input
+                    type="file"
+                    (change)="
+                      onManufacturerFileSelected(
+                        $event
+                      )
+                    " />
+
+                  <span class="file-picker-button">
+                    Choose File
+                  </span>
+
+                  <span class="file-picker-name">
+                    {{
+                      newManufacturerFile?.name ||
+                      'No file selected'
+                    }}
+                  </span>
+
+                </label>
+
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-13">Notes</label>
+                <input id="pbd-field-13"
+                  [(ngModel)]="
+                    newManufacturerNotes
+                  " />
+              </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+              <button
+                class="btn btn-primary"
+                [disabled]="
+                  saving ||
+                  !newManufacturerName.trim() ||
+                  !newManufacturerApprovalDate ||
+                  !newManufacturerFile
+                "
+                (click)="addApprovedManufacturer()">
+                Add Manufacturer
+              </button>
+
+            </div>
+
+          </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="oriented-subsection">
+
+            <button [attr.aria-expanded]="isSectionExpanded('approvals-manufacturers')" aria-controls="pbd-section-approvals-manufacturers"
+              type="button"
+              class="oriented-subsection-header"
+              (click)="
+                toggleSection(
+                  'approvals-manufacturers'
+                )
+              ">
+
+              <div>
+
+                <span class="oriented-kicker">
+                  Current Records
+                </span>
+
+                <strong>
+                  Finished Product Manufacturers
+                </strong>
+
+                <small>
+                  Browse manufacturer approvals and validity status.
+                </small>
+
+              </div>
+
+
+              <span class="accordion-indicator">
+
+                <span class="summary-chip">
+                  {{ basicData.approvedManufacturers.length }}
+                </span>
+
+                <span aria-hidden="true" class="accordion-chevron"
+                  [class.expanded]="
+                    isSectionExpanded(
+                      'approvals-manufacturers'
+                    )
+                  ">
+                  ›
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <div id="pbd-section-approvals-manufacturers"
+              *ngIf="
+                isSectionExpanded(
+                  'approvals-manufacturers'
+                )
+              "
+              class="oriented-subsection-body">
+
+
+          <div class="simple-list">
+
+            <div
+              class="manufacturer-row expandable-record-row"
+              *ngFor="
+                let manufacturer
+                of basicData.approvedManufacturers
+              ">
+
+              <button [attr.aria-expanded]="isManufacturerCardExpanded(manufacturer.id)"
+                type="button"
+                class="record-summary-toggle"
+                (click)="
+                  toggleManufacturerCard(
+                    manufacturer.id
+                  )
+                ">
+
+                <div class="manufacturer-main">
+
+                  <strong>
+                    {{ manufacturer.manufacturerName }}
+                  </strong>
+
+                  <span>
+                    Approval:
+                    {{ manufacturer.approval.date }}
+                  </span>
+
+                </div>
+
+
+                <div class="record-summary-status">
+
+                  <span
+                    class="status-badge"
+                    [class.active]="
+                      manufacturer.isActive
+                    ">
+                    {{
+                      manufacturer.isActive
+                        ? 'Valid'
+                        : 'Invalid'
+                    }}
+                  </span>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isManufacturerCardExpanded(
+                        manufacturer.id
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </div>
+
+              </button>
+
+
+              <div
+                *ngIf="
+                  isManufacturerCardExpanded(
+                    manufacturer.id
+                  )
+                "
+                class="record-expanded-content">
+
+                <div class="record-detail-grid">
+
+                  <div>
+
+                    <span>
+                      Approval Attachment
+                    </span>
+
+                    <strong>
+                      {{
+                        manufacturer.approval
+                          .attachment
+                          .fileName
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    *ngIf="
+                      manufacturer.approval
+                        .attachment
+                        .notes
+                    ">
+
+                    <span>
+                      Notes
+                    </span>
+
+                    <strong>
+                      {{
+                        manufacturer.approval
+                          .attachment
+                          .notes
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div class="manufacturer-actions">
+
+                  <button
+                    *ngIf="
+                      isPdf(
+                        manufacturer.approval
+                          .attachment
+                          .fileName
+                      )
+                    "
+                    class="btn btn-secondary small"
+                    (click)="
+                      previewPdf(
+                        manufacturer.approval.attachment.attachmentId,
+                        manufacturer.approval.attachment.fileName
+                      )
+                    ">
+                    Preview
+                  </button>
+
+
+                  <button
+                    class="btn btn-secondary small"
+                    (click)="
+                      downloadAttachment(
+                        manufacturer.approval.attachment.attachmentId,
+                        manufacturer.approval.attachment.fileName
+                      )
+                    ">
+                    Download
+                  </button>
+
+
+                  <button
+                    *ngIf="manufacturer.isActive"
+                    class="btn btn-secondary small"
+                    (click)="
+                      deactivateManufacturer(
+                        manufacturer.id
+                      )
+                    ">
+                    Set Invalid
+                  </button>
+
+
+                  <button
+                    *ngIf="!manufacturer.isActive"
+                    class="btn btn-primary small"
+                    (click)="
+                      activateManufacturer(
+                        manufacturer.id
+                      )
+                    ">
+                    Activate
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+            <div
+              *ngIf="
+                basicData.approvedManufacturers.length === 0
+              "
+              class="mini-empty">
+              No approved manufacturers have been added.
+            </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- DEADLINES -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngSwitchCase="'deadlines'">
+
+        <section class="card form-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="card-eyebrow">
+                Regulatory Follow-up
+              </span>
+
+              <h3>
+                Regulatory Deadlines
+              </h3>
+
+              <p>
+                Maintain current PV and Decree 600
+                deadlines while preserving all previous
+                versions.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="deadline-editor-grid">
+
+            <!-- ============================================= -->
+            <!-- PV -->
+            <!-- ============================================= -->
+
+            <article class="deadline-edit-card">
+
+              <button [attr.aria-expanded]="isSectionExpanded('deadlines-pv')" aria-controls="pbd-section-deadlines-pv"
+                type="button"
+                class="deadline-heading deadline-heading-button"
+                (click)="
+                  toggleSection(
+                    'deadlines-pv'
+                  )
+                ">
+
+                <div class="deadline-title">
+
+                  <span class="card-eyebrow">
+                    Pharmacovigilance
+                  </span>
+
+                  <strong>
+                    PV
+                  </strong>
+
+                  <small *ngIf="basicData.currentPV as currentPV">
+                    Current V{{ currentPV.versionNumber }}
+                    • Deadline {{ currentPV.deadline }}
+                  </small>
+
+                  <small *ngIf="!basicData.currentPV">
+                    No current PV defined
+                  </small>
+
+                </div>
+
+
+                <span class="deadline-heading-actions">
+
+                  <span
+                    class="status-badge"
+                    [class.active]="
+                      isDeadlineFulfilled(
+                        basicData.currentPV
+                      )
+                    "
+                    [class.pending]="
+                      basicData.currentPV &&
+                      !isDeadlineFulfilled(
+                        basicData.currentPV
+                      )
+                    ">
+
+                    {{
+                      basicData.currentPV
+                        ? (
+                            isDeadlineFulfilled(
+                              basicData.currentPV
+                            )
+                              ? 'Fulfilled'
+                              : 'Pending'
+                          )
+                        : 'Not Defined'
+                    }}
+
+                  </span>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isSectionExpanded(
+                        'deadlines-pv'
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </span>
+
+              </button>
+
+
+              <div id="pbd-section-deadlines-pv"
+                *ngIf="
+                  isSectionExpanded(
+                    'deadlines-pv'
+                  )
+                "
+                class="deadline-expanded-body">
+
+
+              <!-- Current -->
+
+              <ng-container
+                *ngIf="
+                  basicData.currentPV as currentPV;
+                  else noCurrentPV
+                ">
+
+                <div class="current-regulatory-card">
+
+                  <div class="current-regulatory-header">
+
+                    <div>
+
+                      <span class="current-label">
+                        Current PV
+                      </span>
+
+                      <strong>
+                        Version
+                        {{ currentPV.versionNumber }}
+                      </strong>
+
+                    </div>
+
+
+                    <span class="current-version-badge">
+                      Current
+                    </span>
+
+                  </div>
+
+
+                  <div class="current-description">
+
+                    <span>
+                      Description
+                    </span>
+
+                    <strong>
+                      {{ currentPV.description }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="deadline-current-info">
+
+                    <div>
+
+                      <span>
+                        Deadline
+                      </span>
+
+                      <strong>
+                        {{ currentPV.deadline }}
+                      </strong>
+
+                    </div>
+
+
+                    <div>
+
+                      <span>
+                        Status
+                      </span>
+
+                      <strong>
+                        {{
+                          isDeadlineFulfilled(
+                            currentPV
+                          )
+                            ? 'Fulfilled'
+                            : 'Pending'
+                        }}
+                      </strong>
+
+                    </div>
+
+
+                    <div
+                      *ngIf="
+                        currentPV.fulfillmentDate
+                      ">
+
+                      <span>
+                        Fulfillment Date
+                      </span>
+
+                      <strong>
+                        {{
+                          currentPV.fulfillmentDate
+                        }}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <div
+                    *ngIf="currentPV.notes"
+                    class="current-deadline-notes">
+
+                    <span>
+                      Notes
+                    </span>
+
+                    <p>
+                      {{ currentPV.notes }}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div class="subsection-divider">
+                  <span>
+                    Current PV Fulfillment
+                  </span>
+                </div>
+
+
+                <div
+                  *ngIf="
+                    !isDeadlineFulfilled(
+                      currentPV
+                    )
+                  "
+                  class="fulfillment-section">
+
+                  <div class="field">
+
+                    <label for="pbd-field-14">Fulfillment Date</label>
+
+                    <input id="pbd-field-14"
+                      type="date"
+                      [(ngModel)]="
+                        pvFulfillmentDate
+                      "
+                      [disabled]="saving" />
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="
+                      saving ||
+                      !pvFulfillmentDate
+                    "
+                    (click)="fulfillPV()">
+                    Mark Current PV as Fulfilled
+                  </button>
+
+                </div>
+
+
+                <div
+                  *ngIf="
+                    isDeadlineFulfilled(
+                      currentPV
+                    )
+                  "
+                  class="fulfilled-box">
+
+                  <div>
+
+                    <span>
+                      Current PV fulfilled on
+                    </span>
+
+                    <strong>
+                      {{
+                        currentPV.fulfillmentDate
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    [disabled]="saving"
+                    (click)="resetPV()">
+                    Reset Fulfillment
+                  </button>
+
+                </div>
+
+              </ng-container>
+
+
+              <ng-template #noCurrentPV>
+
+                <div class="deadline-empty-current">
+
+                  <strong>
+                    No PV Defined
+                  </strong>
+
+                  <span>
+                    Add the first PV version below.
+                  </span>
+
+                </div>
+
+              </ng-template>
+
+
+              <!-- Add -->
+
+              <div class="deadline-nested-section">
+
+                <button [attr.aria-expanded]="isSectionExpanded('deadlines-pv-add')" aria-controls="pbd-section-deadlines-pv-add"
+                  type="button"
+                  class="deadline-nested-toggle"
+                  (click)="
+                    toggleSection(
+                      'deadlines-pv-add'
+                    )
+                  ">
+
+                  <div>
+
+                    <span class="oriented-kicker">
+                      New Record
+                    </span>
+
+                    <strong>
+                      Add New PV Version
+                    </strong>
+
+                  </div>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isSectionExpanded(
+                        'deadlines-pv-add'
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </button>
+
+
+                <div id="pbd-section-deadlines-pv-add"
+                  *ngIf="
+                    isSectionExpanded(
+                      'deadlines-pv-add'
+                    )
+                  "
+                  class="deadline-nested-body">
+
+
+              <div class="new-deadline-form">
+
+                <div class="field">
+
+                  <label for="pbd-field-15">Description</label>
+
+                  <textarea id="pbd-field-15"
+                    rows="3"
+                    [(ngModel)]="
+                      pvDescription
+                    "
+                    placeholder="Enter new PV regulatory requirement"
+                    [disabled]="saving">
+                  </textarea>
+
+                </div>
+
+
+                <div class="field">
+
+                  <label for="pbd-field-16">Deadline</label>
+
+                  <input id="pbd-field-16"
+                    type="date"
+                    [(ngModel)]="
+                      pvDeadline
+                    "
+                    [disabled]="saving" />
+
+                </div>
+
+
+                <div class="field">
+
+                  <label for="pbd-field-17">Notes</label>
+
+                  <textarea id="pbd-field-17"
+                    rows="3"
+                    [(ngModel)]="
+                      pvNotes
+                    "
+                    placeholder="Optional notes"
+                    [disabled]="saving">
+                  </textarea>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  [disabled]="
+                    saving ||
+                    !pvDescription.trim() ||
+                    !pvDeadline
+                  "
+                  (click)="savePV()">
+                  + Add New PV Version
+                </button>
+
+              </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- History -->
+
+              <div class="deadline-history-section">
+
+                <button [attr.aria-expanded]="isSectionExpanded('deadlines-pv-history')" aria-controls="pbd-section-deadlines-pv-history"
+                  type="button"
+                  class="deadline-history-toggle"
+                  (click)="
+                    toggleSection(
+                      'deadlines-pv-history'
+                    )
+                  ">
+
+                  <div>
+
+                    <span aria-hidden="true" class="history-chevron"
+                      [class.expanded]="
+                        isSectionExpanded(
+                          'deadlines-pv-history'
+                        )
+                      ">
+                      ›
+                    </span>
+
+                    <strong>
+                      PV History
+                    </strong>
+
+                  </div>
+
+
+                  <span class="history-count">
+                    {{ basicData.pvHistory.length }}
+                  </span>
+
+                </button>
+
+
+                <div id="pbd-section-deadlines-pv-history"
+                  *ngIf="
+                    isSectionExpanded(
+                      'deadlines-pv-history'
+                    )
+                  "
+                  class="deadline-history-list">
+
+                  <div
+                    *ngIf="
+                      basicData.pvHistory.length === 0
+                    "
+                    class="mini-empty">
+                    No PV history.
+                  </div>
+
+
+                  <article
+                    *ngFor="
+                      let item
+                      of sortedPVHistory
+                    "
+                    class="deadline-history-row"
+                    [class.current]="
+                      isCurrentPV(item)
+                    ">
+
+                    <div class="history-version">
+
+                      <span>
+                        Version
+                      </span>
+
+                      <strong>
+                        {{ item.versionNumber }}
+                      </strong>
+
+                    </div>
+
+
+                    <div class="history-content">
+
+                      <div class="history-title-row">
+
+                        <strong>
+                          {{ item.description }}
+                        </strong>
+
+
+                        <span
+                          *ngIf="
+                            isCurrentPV(item)
+                          "
+                          class="current-version-badge">
+                          Current
+                        </span>
+
+
+                        <span
+                          class="status-badge"
+                          [class.active]="
+                            isDeadlineFulfilled(
+                              item
+                            )
+                          "
+                          [class.pending]="
+                            !isDeadlineFulfilled(
+                              item
+                            )
+                          ">
+
+                          {{
+                            isDeadlineFulfilled(
+                              item
+                            )
+                              ? 'Fulfilled'
+                              : 'Pending'
+                          }}
+
+                        </span>
+
+                      </div>
+
+
+                      <div class="history-meta">
+
+                        <span>
+                          Deadline:
+                          <strong>
+                            {{ item.deadline }}
+                          </strong>
+                        </span>
+
+                        <span
+                          *ngIf="
+                            item.fulfillmentDate
+                          ">
+                          Fulfilled:
+                          <strong>
+                            {{
+                              item.fulfillmentDate
+                            }}
+                          </strong>
+                        </span>
+
+                      </div>
+
+
+                      <p
+                        *ngIf="item.notes"
+                        class="history-notes">
+                        {{ item.notes }}
+                      </p>
+
+                    </div>
+
+                  </article>
+
+                </div>
+
+              </div>
+
+              </div>
+
+            </article>
+
+
+            <!-- ============================================= -->
+            <!-- DECREE 600 -->
+            <!-- ============================================= -->
+
+            <article class="deadline-edit-card">
+
+              <button [attr.aria-expanded]="isSectionExpanded('deadlines-decree600')" aria-controls="pbd-section-deadlines-decree600"
+                type="button"
+                class="deadline-heading deadline-heading-button"
+                (click)="
+                  toggleSection(
+                    'deadlines-decree600'
+                  )
+                ">
+
+                <div class="deadline-title">
+
+                  <span class="card-eyebrow">
+                    Regulatory
+                  </span>
+
+                  <strong>
+                    Decree 600
+                  </strong>
+
+                  <small *ngIf="basicData.currentDecree600 as currentDecree">
+                    Current V{{ currentDecree.versionNumber }}
+                    • Deadline {{ currentDecree.deadline }}
+                  </small>
+
+                  <small *ngIf="!basicData.currentDecree600">
+                    No current Decree 600 defined
+                  </small>
+
+                </div>
+
+
+                <span class="deadline-heading-actions">
+
+                  <span
+                    class="status-badge"
+                    [class.active]="
+                      isDeadlineFulfilled(
+                        basicData.currentDecree600
+                      )
+                    "
+                    [class.pending]="
+                      basicData.currentDecree600 &&
+                      !isDeadlineFulfilled(
+                        basicData.currentDecree600
+                      )
+                    ">
+
+                    {{
+                      basicData.currentDecree600
+                        ? (
+                            isDeadlineFulfilled(
+                              basicData.currentDecree600
+                            )
+                              ? 'Fulfilled'
+                              : 'Pending'
+                          )
+                        : 'Not Defined'
+                    }}
+
+                  </span>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isSectionExpanded(
+                        'deadlines-decree600'
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </span>
+
+              </button>
+
+
+              <div id="pbd-section-deadlines-decree600"
+                *ngIf="
+                  isSectionExpanded(
+                    'deadlines-decree600'
+                  )
+                "
+                class="deadline-expanded-body">
+
+
+              <ng-container
+                *ngIf="
+                  basicData.currentDecree600 as currentDecree;
+                  else noCurrentDecree
+                ">
+
+                <div class="current-regulatory-card">
+
+                  <div class="current-regulatory-header">
+
+                    <div>
+
+                      <span class="current-label">
+                        Current Decree 600
+                      </span>
+
+                      <strong>
+                        Version
+                        {{ currentDecree.versionNumber }}
+                      </strong>
+
+                    </div>
+
+
+                    <span class="current-version-badge">
+                      Current
+                    </span>
+
+                  </div>
+
+
+                  <div class="current-description">
+
+                    <span>
+                      Description
+                    </span>
+
+                    <strong>
+                      {{ currentDecree.description }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="deadline-current-info">
+
+                    <div>
+
+                      <span>
+                        Deadline
+                      </span>
+
+                      <strong>
+                        {{ currentDecree.deadline }}
+                      </strong>
+
+                    </div>
+
+
+                    <div>
+
+                      <span>
+                        Status
+                      </span>
+
+                      <strong>
+                        {{
+                          isDeadlineFulfilled(
+                            currentDecree
+                          )
+                            ? 'Fulfilled'
+                            : 'Pending'
+                        }}
+                      </strong>
+
+                    </div>
+
+
+                    <div
+                      *ngIf="
+                        currentDecree.fulfillmentDate
+                      ">
+
+                      <span>
+                        Fulfillment Date
+                      </span>
+
+                      <strong>
+                        {{
+                          currentDecree.fulfillmentDate
+                        }}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <div
+                    *ngIf="currentDecree.notes"
+                    class="current-deadline-notes">
+
+                    <span>
+                      Notes
+                    </span>
+
+                    <p>
+                      {{ currentDecree.notes }}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div class="subsection-divider">
+                  <span>
+                    Current Decree 600 Fulfillment
+                  </span>
+                </div>
+
+
+                <div
+                  *ngIf="
+                    !isDeadlineFulfilled(
+                      currentDecree
+                    )
+                  "
+                  class="fulfillment-section">
+
+                  <div class="field">
+
+                    <label for="pbd-field-18">Fulfillment Date</label>
+
+                    <input id="pbd-field-18"
+                      type="date"
+                      [(ngModel)]="
+                        decree600FulfillmentDate
+                      "
+                      [disabled]="saving" />
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="
+                      saving ||
+                      !decree600FulfillmentDate
+                    "
+                    (click)="fulfillDecree600()">
+                    Mark Current Decree 600 as Fulfilled
+                  </button>
+
+                </div>
+
+
+                <div
+                  *ngIf="
+                    isDeadlineFulfilled(
+                      currentDecree
+                    )
+                  "
+                  class="fulfilled-box">
+
+                  <div>
+
+                    <span>
+                      Current Decree 600 fulfilled on
+                    </span>
+
+                    <strong>
+                      {{
+                        currentDecree.fulfillmentDate
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    [disabled]="saving"
+                    (click)="resetDecree600()">
+                    Reset Fulfillment
+                  </button>
+
+                </div>
+
+              </ng-container>
+
+
+              <ng-template #noCurrentDecree>
+
+                <div class="deadline-empty-current">
+
+                  <strong>
+                    No Decree 600 Defined
+                  </strong>
+
+                  <span>
+                    Add the first Decree 600 version below.
+                  </span>
+
+                </div>
+
+              </ng-template>
+
+
+              <div class="deadline-nested-section">
+
+                <button [attr.aria-expanded]="isSectionExpanded('deadlines-decree600-add')" aria-controls="pbd-section-deadlines-decree600-add"
+                  type="button"
+                  class="deadline-nested-toggle"
+                  (click)="
+                    toggleSection(
+                      'deadlines-decree600-add'
+                    )
+                  ">
+
+                  <div>
+
+                    <span class="oriented-kicker">
+                      New Record
+                    </span>
+
+                    <strong>
+                      Add New Decree 600 Version
+                    </strong>
+
+                  </div>
+
+
+                  <span aria-hidden="true" class="accordion-chevron"
+                    [class.expanded]="
+                      isSectionExpanded(
+                        'deadlines-decree600-add'
+                      )
+                    ">
+                    ›
+                  </span>
+
+                </button>
+
+
+                <div id="pbd-section-deadlines-decree600-add"
+                  *ngIf="
+                    isSectionExpanded(
+                      'deadlines-decree600-add'
+                    )
+                  "
+                  class="deadline-nested-body">
+
+
+              <div class="new-deadline-form">
+
+                <div class="field">
+
+                  <label for="pbd-field-19">Description</label>
+
+                  <textarea id="pbd-field-19"
+                    rows="3"
+                    [(ngModel)]="
+                      decree600Description
+                    "
+                    placeholder="Enter new Decree 600 requirement"
+                    [disabled]="saving">
+                  </textarea>
+
+                </div>
+
+
+                <div class="field">
+
+                  <label for="pbd-field-20">Deadline</label>
+
+                  <input id="pbd-field-20"
+                    type="date"
+                    [(ngModel)]="
+                      decree600Deadline
+                    "
+                    [disabled]="saving" />
+
+                </div>
+
+
+                <div class="field">
+
+                  <label for="pbd-field-21">Notes</label>
+
+                  <textarea id="pbd-field-21"
+                    rows="3"
+                    [(ngModel)]="
+                      decree600Notes
+                    "
+                    placeholder="Optional notes"
+                    [disabled]="saving">
+                  </textarea>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  [disabled]="
+                    saving ||
+                    !decree600Description.trim() ||
+                    !decree600Deadline
+                  "
+                  (click)="saveDecree600()">
+                  + Add New Decree 600 Version
+                </button>
+
+              </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="deadline-history-section">
+
+                <button [attr.aria-expanded]="isSectionExpanded('deadlines-decree600-history')" aria-controls="pbd-section-deadlines-decree600-history"
+                  type="button"
+                  class="deadline-history-toggle"
+                  (click)="
+                    toggleSection(
+                      'deadlines-decree600-history'
+                    )
+                  ">
+
+                  <div>
+
+                    <span aria-hidden="true" class="history-chevron"
+                      [class.expanded]="
+                        isSectionExpanded(
+                          'deadlines-decree600-history'
+                        )
+                      ">
+                      ›
+                    </span>
+
+                    <strong>
+                      Decree 600 History
+                    </strong>
+
+                  </div>
+
+
+                  <span class="history-count">
+                    {{
+                      basicData
+                        .decree600History
+                        .length
+                    }}
+                  </span>
+
+                </button>
+
+
+                <div id="pbd-section-deadlines-decree600-history"
+                  *ngIf="
+                    isSectionExpanded(
+                      'deadlines-decree600-history'
+                    )
+                  "
+                  class="deadline-history-list">
+
+                  <div
+                    *ngIf="
+                      basicData
+                        .decree600History
+                        .length === 0
+                    "
+                    class="mini-empty">
+                    No Decree 600 history.
+                  </div>
+
+
+                  <article
+                    *ngFor="
+                      let item
+                      of sortedDecree600History
+                    "
+                    class="deadline-history-row"
+                    [class.current]="
+                      isCurrentDecree600(
+                        item
+                      )
+                    ">
+
+                    <div class="history-version">
+
+                      <span>
+                        Version
+                      </span>
+
+                      <strong>
+                        {{ item.versionNumber }}
+                      </strong>
+
+                    </div>
+
+
+                    <div class="history-content">
+
+                      <div class="history-title-row">
+
+                        <strong>
+                          {{ item.description }}
+                        </strong>
+
+
+                        <span
+                          *ngIf="
+                            isCurrentDecree600(
+                              item
+                            )
+                          "
+                          class="current-version-badge">
+                          Current
+                        </span>
+
+
+                        <span
+                          class="status-badge"
+                          [class.active]="
+                            isDeadlineFulfilled(
+                              item
+                            )
+                          "
+                          [class.pending]="
+                            !isDeadlineFulfilled(
+                              item
+                            )
+                          ">
+
+                          {{
+                            isDeadlineFulfilled(
+                              item
+                            )
+                              ? 'Fulfilled'
+                              : 'Pending'
+                          }}
+
+                        </span>
+
+                      </div>
+
+
+                      <div class="history-meta">
+
+                        <span>
+                          Deadline:
+                          <strong>
+                            {{ item.deadline }}
+                          </strong>
+                        </span>
+
+                        <span
+                          *ngIf="
+                            item.fulfillmentDate
+                          ">
+                          Fulfilled:
+                          <strong>
+                            {{
+                              item.fulfillmentDate
+                            }}
+                          </strong>
+                        </span>
+
+                      </div>
+
+
+                      <p
+                        *ngIf="item.notes"
+                        class="history-notes">
+                        {{ item.notes }}
+                      </p>
+
+                    </div>
+
+                  </article>
+
+                </div>
+
+              </div>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <ng-container
+        *ngSwitchDefault>
+
+        <section class="card form-card">
+
+          <div class="empty-state">
+
+            <strong>
+              Select a section
+            </strong>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+    </section>
+
+  </ng-container>
+
+  <!-- ===================================================== -->
+  <!-- PDF Viewer -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="pdfViewerOpen"
+    class="pdf-viewer-overlay"
+    (click)="closePdfViewer()">
+
+    <div
+      class="pdf-viewer" role="dialog" aria-modal="true" aria-label="Document preview"
+      (click)="$event.stopPropagation()">
+
+      <header class="pdf-viewer-header">
+
+        <div class="pdf-viewer-title">
+
+          <div class="pdf-icon">
+            PDF
+          </div>
+
+          <div>
+
+            <strong>
+              {{ pdfViewerFileName }}
+            </strong>
+
+            <span>
+              Document Preview
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="pdf-close-button"
+          (click)="closePdfViewer()">
+          ✕ Close
+        </button>
+
+      </header>
+
+
+      <div
+        *ngIf="pdfViewerLoading"
+        class="pdf-viewer-loading">
+
+        <div class="spinner"></div>
+
+        Loading document...
+
+      </div>
+
+
+      <iframe
+        *ngIf="
+          !pdfViewerLoading &&
+          pdfViewerUrl
+        "
+        class="pdf-frame"
+        [src]="pdfViewerUrl"
+        [title]="pdfViewerFileName">
+      </iframe>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- Add Active Ingredient Modal -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="addIngredientModalOpen"
+  class="app-modal-overlay"
+  (click)="closeAddIngredientModal()">
+
+  <div
+    class="app-modal medium" role="dialog" aria-modal="true" aria-label="Add active ingredient"
+    (click)="$event.stopPropagation()">
+
+    <header class="app-modal-header">
+
+      <div>
+
+        <span class="card-eyebrow">
+          Composition
+        </span>
+
+        <h3>
+          Add Active Ingredient
+        </h3>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="modal-close" aria-label="Close dialog"
+        (click)="closeAddIngredientModal()">
+        ✕
+      </button>
+
+    </header>
+
+
+    <div class="app-modal-body">
+
+      <div class="field">
+
+        <label for="pbd-field-22">Search Active Ingredients</label>
+
+        <div class="control-with-action">
+
+          <input id="pbd-field-22"
+            type="search"
+            [(ngModel)]="
+              activeIngredientSearch
+            "
+            (keyup.enter)="
+              searchActiveIngredients()
+            " />
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="
+              searchActiveIngredients()
+            ">
+            Search
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-filter-grid">
+
+        <div class="field">
+
+          <label for="pbd-field-23">Filter</label>
+
+          <select id="pbd-field-23"
+            [(ngModel)]="
+              activeIngredientFilter
+            ">
+
+            <option value="available">
+              Available
+            </option>
+
+            <option value="all">
+              All
+            </option>
+
+            <option value="added">
+              Already Added
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="pbd-field-24">Sort</label>
+
+          <select id="pbd-field-24"
+            [(ngModel)]="
+              activeIngredientSort
+            ">
+
+            <option value="asc">
+              Name A → Z
+            </option>
+
+            <option value="desc">
+              Name Z → A
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="loadingActiveIngredients"
+        class="modal-loading">
+
+        <div class="spinner"></div>
+
+        Loading active ingredients...
+
+      </div>
+
+
+      <div
+        *ngIf="
+          !loadingActiveIngredients
+        "
+        class="ai-search-results">
+
+        <button
+          type="button"
+          class="ai-search-result"
+          [attr.aria-pressed]="ingredient.id === selectedActiveIngredientId"
+          *ngFor="
+            let ingredient
+            of filteredActiveIngredients
+          "
+          [class.selected]="
+            ingredient.id ===
+            selectedActiveIngredientId
+          "
+          [class.already-added]="
+            isActiveIngredientAdded(
+              ingredient.id
+            )
+          "
+          [disabled]="
+            isActiveIngredientAdded(
+              ingredient.id
+            )
+          "
+          (click)="
+            selectActiveIngredient(
+              ingredient
+            )
+          ">
+
+          <div class="ai-search-result-main">
+
+            <div class="ai-search-result-icon">
+              AI
+            </div>
+
+
+            <div class="ai-search-result-content">
+
+              <strong>
+                {{ ingredient.name }}
+              </strong>
+
+              <div class="ai-search-result-meta">
+
+                <span
+                  *ngIf="ingredient.code">
+                  {{ ingredient.code }}
+                </span>
+
+                <span>
+                  CTD:
+                  {{ ingredient.ctdId }}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="
+          selectedActiveIngredient
+            as selected
+        "
+        class="selected-master-record">
+
+        <span>
+          Selected
+        </span>
+
+        <strong>
+          {{ selected.name }}
+        </strong>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="pbd-field-25">Strength</label>
+
+        <input id="pbd-field-25"
+          type="text"
+          [(ngModel)]="
+            newActiveIngredientStrength
+          "
+          [disabled]="
+            !selectedActiveIngredientId
+          " />
+
+      </div>
+
+    </div>
+
+
+    <footer class="app-modal-footer">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeAddIngredientModal()">
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="
+          saving ||
+          !selectedActiveIngredientId ||
+          !newActiveIngredientStrength.trim()
+        "
+        (click)="addActiveIngredient()">
+        Add Active Ingredient
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- Active Ingredient Details Modal -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="
+    ingredientDetailsModalOpen &&
+    selectedIngredientDetails as ingredient
+  "
+  class="app-modal-overlay"
+  (click)="closeIngredientDetails()">
+
+  <div
+    class="app-modal large" role="dialog" aria-modal="true" aria-label="Active ingredient details"
+    (click)="$event.stopPropagation()">
+
+    <header class="app-modal-header">
+
+      <div class="ingredient-modal-title">
+
+        <div class="ingredient-avatar">
+          AI
+        </div>
+
+        <div>
+
+          <span class="card-eyebrow">
+            Active Ingredient
+          </span>
+
+          <h3>
+            {{ ingredient.activeIngredient.name }}
+          </h3>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="modal-close" aria-label="Close dialog"
+        (click)="closeIngredientDetails()">
+        ✕
+      </button>
+
+    </header>
+
+
+    <nav class="ingredient-modal-tabs" aria-label="Active ingredient sections">
+
+      <button [attr.aria-pressed]="ingredientDetailsTab === 'general'"
+        type="button"
+        [class.active]="
+          ingredientDetailsTab ===
+          'general'
+        "
+        (click)="
+          setIngredientDetailsTab(
+            'general'
+          )
+        ">
+        General
+      </button>
+
+
+      <button [attr.aria-pressed]="ingredientDetailsTab === 'shelf-life'"
+        type="button"
+        [class.active]="
+          ingredientDetailsTab ===
+          'shelf-life'
+        "
+        (click)="
+          setIngredientDetailsTab(
+            'shelf-life'
+          )
+        ">
+        Shelf Life
+      </button>
+
+
+      <button [attr.aria-pressed]="ingredientDetailsTab === 'packs'"
+        type="button"
+        [class.active]="
+          ingredientDetailsTab ===
+          'packs'
+        "
+        (click)="
+          setIngredientDetailsTab(
+            'packs'
+          )
+        ">
+        Approved Packs
+        <span>
+          {{ ingredient.approvedPacks.length }}
+        </span>
+      </button>
+
+
+      <button [attr.aria-pressed]="ingredientDetailsTab === 'suppliers'"
+        type="button"
+        [class.active]="
+          ingredientDetailsTab ===
+          'suppliers'
+        "
+        (click)="
+          setIngredientDetailsTab(
+            'suppliers'
+          )
+        ">
+        Suppliers
+        <span>
+          {{ ingredient.approvedSuppliers.length }}
+        </span>
+      </button>
+
+    </nav>
+
+
+    <div class="app-modal-body">
+
+      <ng-container
+        [ngSwitch]="ingredientDetailsTab">
+
+
+        <!-- General -->
+
+        <ng-container
+          *ngSwitchCase="'general'">
+
+          <div class="modal-section">
+
+            <div class="field">
+
+              <label for="pbd-field-26">Strength</label>
+
+              <div class="control-with-action">
+
+                <input id="pbd-field-26"
+                  [(ngModel)]="
+                    ingredientEditStrength
+                  " />
+
+                <button
+                  class="btn btn-primary"
+                  (click)="saveIngredientStrength()">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Storage Condition
+              </label>
+
+              <div class="control-with-action">
+
+                <app-creatable-lookup
+                  [items]="storageConditions"
+                  [(selectedId)]="
+                    ingredientEditStorageConditionId
+                  "
+                  [creating]="
+                    creatingIngredientStorageCondition
+                  "
+                  (createRequested)="
+                    createIngredientStorageCondition(
+                      $event
+                    )
+                  ">
+                </app-creatable-lookup>
+
+                <button
+                  class="btn btn-primary"
+                  (click)="
+                    saveIngredientStorageCondition()
+                  ">
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Physical Description
+              </label>
+
+              <textarea
+                [(ngModel)]="
+                  ingredientEditPhysicalDescription
+                ">
+              </textarea>
+
+              <button
+                class="btn btn-primary"
+                (click)="
+                  saveIngredientPhysicalDescription()
+                ">
+                Save
+              </button>
+
+            </div>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- Shelf Life -->
+
+        <ng-container
+          *ngSwitchCase="'shelf-life'">
+
+          <div class="modal-section">
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label for="pbd-field-27">Months</label>
+                <input id="pbd-field-27"
+                  type="number"
+                  [(ngModel)]="
+                    ingredientShelfLifeNumberOfMonths
+                  " />
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-28">Approval Date</label>
+                <input id="pbd-field-28"
+                  type="date"
+                  [(ngModel)]="
+                    ingredientShelfLifeApprovalDate
+                  " />
+              </div>
+
+            </div>
+
+
+            <div class="simple-list">
+
+              <div
+                class="simple-list-row"
+                *ngFor="
+                  let attachment
+                  of ingredientShelfLifeAttachments
+                ">
+
+                <strong>
+                  {{ attachment.fileName }}
+                </strong>
+
+                <button
+                  class="btn btn-danger small"
+                  (click)="
+                    removeIngredientShelfLifeAttachment(
+                      attachment.attachmentId
+                    )
+                  ">
+                  Remove
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label class="file-picker">
+
+                <input
+                  type="file"
+                  (change)="
+                    onIngredientShelfLifeFileSelected(
+                      $event
+                    )
+                  " />
+
+                <span class="file-picker-button">
+                  Choose File
+                </span>
+
+                <span class="file-picker-name">
+                  {{
+                    ingredientShelfLifeFile?.name ||
+                    'No file selected'
+                  }}
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <div class="field">
+              <label for="pbd-field-29">Notes</label>
+              <input id="pbd-field-29"
+                [(ngModel)]="
+                  ingredientShelfLifeNotes
+                " />
+            </div>
+
+
+            <button
+              class="btn btn-secondary"
+              [disabled]="
+                !ingredientShelfLifeFile
+              "
+              (click)="
+                addIngredientShelfLifeAttachment()
+              ">
+              Add Document
+            </button>
+
+
+            <button
+              class="btn btn-primary"
+              (click)="
+                saveIngredientShelfLife()
+              ">
+              Save Shelf Life
+            </button>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- Packs -->
+
+        <ng-container
+          *ngSwitchCase="'packs'">
+
+          <div class="modal-section">
+
+            <div
+              class="modal-pack-row"
+              *ngFor="
+                let pack
+                of ingredient.approvedPacks
+              ">
+
+              <div>
+                <strong>
+                  {{ pack.description }}
+                </strong>
+
+                <small>
+                  {{
+                    pack.approval
+                      .attachment
+                      .fileName
+                  }}
+                </small>
+              </div>
+
+
+              <button
+                class="btn btn-danger small"
+                (click)="
+                  removeIngredientApprovedPack(
+                    pack.id
+                  )
+                ">
+                Remove
+              </button>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label for="pbd-field-30">Description</label>
+                <input id="pbd-field-30"
+                  [(ngModel)]="
+                    ingredientPackDescription
+                  " />
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-31">Approval Date</label>
+                <input id="pbd-field-31"
+                  type="date"
+                  [(ngModel)]="
+                    ingredientPackApprovalDate
+                  " />
+              </div>
+
+              <div class="field">
+
+                <label class="file-picker">
+
+                  <input
+                    type="file"
+                    (change)="
+                      onIngredientPackFileSelected(
+                        $event
+                      )
+                    " />
+
+                  <span class="file-picker-button">
+                    Choose File
+                  </span>
+
+                  <span class="file-picker-name">
+                    {{
+                      ingredientPackFile?.name ||
+                      'No file selected'
+                    }}
+                  </span>
+
+                </label>
+
+              </div>
+
+              <div class="field">
+                <label for="pbd-field-32">Notes</label>
+                <input id="pbd-field-32"
+                  [(ngModel)]="
+                    ingredientPackNotes
+                  " />
+              </div>
+
+            </div>
+
+
+            <button
+              class="btn btn-primary"
+              (click)="
+                addIngredientApprovedPack()
+              ">
+              Add Approved Pack
+            </button>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- Suppliers -->
+
+        <ng-container
+          *ngSwitchCase="'suppliers'">
+
+          <div class="modal-section">
+
+            <div
+              class="modal-supplier-row"
+              *ngFor="
+                let supplier
+                of ingredient.approvedSuppliers
+              ">
+
+              <div>
+                <strong>
+                  {{ supplier.supplierName }}
+                </strong>
+              </div>
+
+              <button
+                class="btn btn-secondary small"
+                (click)="
+                  toggleIngredientSupplier(
+                    supplier.id,
+                    supplier.isActive
+                  )
+                ">
+                {{
+                  supplier.isActive
+                    ? 'Set Invalid'
+                    : 'Set Valid'
+                }}
+              </button>
+
+            </div>
+
+
+            <div class="control-with-action">
+
+              <input
+                type="search"
+                aria-label="Search suppliers"
+                placeholder="Search supplier name or code"
+                [(ngModel)]="
+                  supplierSearch
+                "
+                (keyup.enter)="
+                  searchSuppliers()
+                " />
+
+              <button
+                class="btn btn-primary"
+                (click)="searchSuppliers()">
+                Search
+              </button>
+
+            </div>
+
+
+            <div class="supplier-search-results">
+
+              <button
+                class="supplier-search-result"
+                [class.selected]="supplier.id === selectedSupplierId"
+                [attr.aria-pressed]="supplier.id === selectedSupplierId"
+                *ngFor="
+                  let supplier
+                  of supplierOptions
+                "
+                [disabled]="
+                  isSupplierAlreadyAdded(
+                    supplier.id
+                  )
+                "
+                (click)="
+                  selectSupplier(
+                    supplier
+                  )
+                ">
+
+                <strong>
+                  {{ supplier.name }}
+                </strong>
+
+                <span>
+                  {{ supplier.jdeCode }}
+                </span>
+
+              </button>
+
+            </div>
+
+
+            <button
+              class="btn btn-primary"
+              [disabled]="
+                !selectedSupplierId
+              "
+              (click)="
+                addIngredientApprovedSupplier()
+              ">
+              Add Approved Supplier
+            </button>
+
+          </div>
+
+        </ng-container>
+
+      </ng-container>
+
+    </div>
+
+
+    <footer class="app-modal-footer">
+
+      <button
+        class="btn btn-secondary"
+        (click)="closeIngredientDetails()">
+        Close
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- Product Shelf Life History Modal -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="shelfLifeHistoryModalOpen"
+  class="app-modal-overlay"
+  (click)="closeShelfLifeHistory()">
+
+  <div
+    class="app-modal large"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="shelf-life-history-title"
+    (click)="$event.stopPropagation()">
+
+
+    <!-- Header -->
+
+    <header class="app-modal-header">
+
+      <div>
+
+        <span class="card-eyebrow">
+          Product Shelf Life
+        </span>
+
+        <h3 id="shelf-life-history-title">
+          Shelf Life History
+        </h3>
+
+        <p>
+          Review all approved shelf-life versions
+          recorded for this product.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="modal-close"
+        aria-label="Close shelf life history"
+        (click)="closeShelfLifeHistory()">
+
+        ✕
+
+      </button>
+
+    </header>
+
+
+    <!-- Body -->
+
+    <div class="app-modal-body">
+
+
+      <!-- Toolbar -->
+
+      <div class="shelf-life-history-toolbar">
+
+        <div>
+
+          <strong>
+            {{ shelfLifeHistory.length }}
+          </strong>
+
+          <span>
+            version{{
+              shelfLifeHistory.length === 1
+                ? ''
+                : 's'
+            }}
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          [disabled]="shelfLifeHistoryLoading"
+          (click)="refreshShelfLifeHistory()">
+
+          Refresh History
+
+        </button>
+
+      </div>
+
+
+      <!-- Loading -->
+
+      <div
+        *ngIf="shelfLifeHistoryLoading"
+        class="modal-loading">
+
+        <div class="spinner"></div>
+
+        <span>
+          Loading shelf life history...
+        </span>
+
+      </div>
+
+
+      <!-- Error -->
+
+      <div
+        *ngIf="
+          !shelfLifeHistoryLoading &&
+          shelfLifeHistoryError
+        "
+        class="message error-message">
+
+        <span class="message-icon">
+          !
+        </span>
+
+        <span>
+          {{ shelfLifeHistoryError }}
+        </span>
+
+      </div>
+
+
+      <!-- Empty -->
+
+      <div
+        *ngIf="
+          !shelfLifeHistoryLoading &&
+          !shelfLifeHistoryError &&
+          shelfLifeHistory.length === 0
+        "
+        class="empty-state">
+
+        <strong>
+          No Shelf Life History
+        </strong>
+
+        <span>
+          No shelf-life versions have been recorded yet.
+        </span>
+
+      </div>
+
+
+      <!-- History -->
+
+      <div
+        *ngIf="
+          !shelfLifeHistoryLoading &&
+          shelfLifeHistory.length > 0
+        "
+        class="shelf-life-history-list">
+
+
+        <article
+          *ngFor="
+            let item
+            of shelfLifeHistory
+          "
+          class="shelf-life-history-card"
+          [class.current]="item.isCurrent">
+
+
+          <!-- Version -->
+
+          <div class="shelf-life-history-version">
+
+            <span>
+              Version
+            </span>
+
+            <strong>
+              {{ item.versionNumber }}
+            </strong>
+
+          </div>
+
+
+          <!-- Content -->
+
+          <div class="shelf-life-history-content">
+
+
+            <div class="shelf-life-history-title">
+
+              <div>
+
+                <strong>
+                  {{ item.numberOfMonths }}
+                  Months
+                </strong>
+
+                <span>
+                  Approved
+                  {{ item.approvalDate }}
+                </span>
+
+              </div>
+
+
+              <span
+                *ngIf="item.isCurrent"
+                class="current-version-badge">
+
+                Current
+
+              </span>
+
+            </div>
+
+
+            <div class="record-detail-grid">
+
+              <div>
+
+                <span>
+                  Shelf Life
+                </span>
+
+                <strong>
+                  {{ item.numberOfMonths }}
+                  months
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Approval Date
+                </span>
+
+                <strong>
+                  {{ item.approvalDate }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Supporting Documents
+                </span>
+
+                <strong>
+                  {{ item.attachments.length }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- Attachments -->
+
+            <div
+              *ngIf="item.attachments.length > 0"
+              class="shelf-life-history-documents">
+
+              <span class="oriented-kicker">
+                Supporting Documents
+              </span>
+
+
+              <div class="simple-list">
+
+                <div
+                  *ngFor="
+                    let attachment
+                    of item.attachments
+                  "
+                  class="simple-list-row">
+
+                  <div>
+
+                    <strong>
+                      {{ attachment.fileName }}
+                    </strong>
+
+                    <small
+                      *ngIf="attachment.notes">
+
+                      {{ attachment.notes }}
+
+                    </small>
+
+                  </div>
+
+
+                  <div class="attachment-actions-group">
+
+                    <button
+                      *ngIf="
+                        isPdf(
+                          attachment.fileName
+                        )
+                      "
+                      type="button"
+                      class="attachment-action"
+                      (click)="
+                        previewPdf(
+                          attachment.attachmentId,
+                          attachment.fileName
+                        )
+                      ">
+
+                      Preview PDF
+
+                    </button>
+
+
+                    <button
+                      *ngIf="
+                        !isPdf(
+                          attachment.fileName
+                        )
+                      "
+                      type="button"
+                      class="attachment-action"
+                      (click)="
+                        openAttachment(
+                          attachment.attachmentId,
+                          attachment.fileName
+                        )
+                      ">
+
+                      Open
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="attachment-action secondary"
+                      (click)="
+                        downloadAttachment(
+                          attachment.attachmentId,
+                          attachment.fileName
+                        )
+                      ">
+
+                      Download
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div
+              *ngIf="item.attachments.length === 0"
+              class="mini-empty">
+
+              No supporting documents for this version.
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <footer class="app-modal-footer">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeShelfLifeHistory()">
+
+        Close
+
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>

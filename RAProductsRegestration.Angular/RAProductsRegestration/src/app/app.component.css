@@ -1,0 +1,48 @@
+.application { min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  min-height: 76px;
+  padding: 0 40px;
+  background: var(--navy);
+  color: white;
+  box-shadow: 0 2px 8px rgb(23 43 67 / 10%);
+}
+.brand { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.brand-logo { display: grid; place-items: center; width: 42px; height: 42px; background: #24465b; border: 1px solid #3b6375; border-radius: 11px; color: #a3e1df; }
+.brand-logo svg { width: 29px; height: 29px; }
+.brand-text strong { display: block; font-size: 17px; font-weight: 650; letter-spacing: -.3px; }
+.brand-text > span { display: block; color: #b2c4d4; font-size: 12px; letter-spacing: .02em; }
+.top-navigation { display: flex; align-self: stretch; align-items: stretch; flex: 1; }
+.top-navigation a { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 0 20px; color: #b6c8d9; font-size: 14px; font-weight: 600; transition: background var(--transition); }
+.top-navigation a svg { width: 18px; height: 18px; }
+.top-navigation a:hover, .top-navigation a.active { color: white; background: rgb(255 255 255 / 5%); }
+.top-navigation a.active::after { content: ''; position: absolute; right: 20px; left: 20px; bottom: 0; height: 3px; background: #7ed1d0; border-radius: 3px 3px 0 0; }
+.workspace-label { display: flex; align-items: center; gap: 16px; color: #c5d2df; font-size: 13px; }
+.workspace-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #527087; border-radius: 50%; color: #deebf4; font-size: 11px; font-weight: 700; }
+.application-content { flex: 1; min-width: 0; }
+.application-content:focus { outline: none; }
+.application-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px; }
+.application-footer span span { margin: 0 8px; color: var(--border-dark); }
+.skip-link { position: fixed; left: 16px; top: -100px; z-index: 10001; border-radius: 8px; padding: 12px 18px; background: white; color: var(--navy); font-weight: 600; box-shadow: var(--shadow-md); }
+.skip-link:focus { top: 12px; }
+.topbar a:focus-visible { outline-color: #a3e1df; outline-offset: -4px; border-radius: 4px; }
+@media (max-width: 1100px) { .topbar { padding: 0 24px; gap: 28px; } .application-footer { padding: 18px 24px; } }
+@media (max-width: 680px) {
+  .topbar { min-height: 68px; padding: 0 16px; gap: 16px; }
+  .brand-logo { width: 35px; height: 35px; border-radius: 9px; }
+  .brand-logo svg { width: 25px; height: 25px; }
+  .brand { gap: 9px; }
+  .brand-text strong { font-size: 15px; }
+  .brand-text > span { font-size: 10px; }
+  .top-navigation { justify-content: flex-end; }
+  .top-navigation a { padding: 0 10px; gap: 6px; font-size: 13px; }
+  .top-navigation a.active::after { left: 10px; right: 10px; }
+  .workspace-label { display: none; }
+  .application-footer { padding: 18px 16px; font-size: 11px; }
+  .application-footer > span:last-child { display: none; }
+}

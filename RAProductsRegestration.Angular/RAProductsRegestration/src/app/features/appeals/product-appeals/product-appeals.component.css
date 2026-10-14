@@ -1,0 +1,7 @@
+/* Layout specific to this registration section. Shared patterns live in app/shared-workspace.css. */
+.appeals-page { display: flex; flex-direction: column; gap: 18px; width: 100%; }
+.appeal-tab { display: grid; grid-template-columns: auto minmax(110px, 1fr) auto; align-items: center; gap: 9px; min-width: 225px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); text-align: left; cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease; }
+.appeal-tab:hover { border-color: #bddfe2; background: #f4fafb; }
+.appeal-tab.active { border-color: var(--accent); background: #edf8f8; }
+.appeal-tab.active .tab-number { background: var(--accent); color: var(--surface); }
+.appeal-info-card { padding: 22px; }

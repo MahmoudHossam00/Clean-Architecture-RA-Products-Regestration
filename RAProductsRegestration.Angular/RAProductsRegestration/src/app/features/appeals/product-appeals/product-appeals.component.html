@@ -1,0 +1,2742 @@
+<section class="appeals-page" [attr.aria-busy]="loading" aria-label="Product appeals">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-eyebrow">
+        Registration
+      </span>
+
+      <h2>
+        Product Appeals
+      </h2>
+
+      <p>
+        Manage regulatory appeals, appeal types,
+        approvals and related requirements.
+      </p>
+
+    </div>
+
+
+    <div class="page-header-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="loading || saving"
+        (click)="load()">
+        Refresh
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="saving"
+        (click)="openCreateModal()">
+        + Add Appeal
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Messages -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorMessage"
+    class="message error-message" role="alert">
+
+    <span class="message-icon">
+      !
+    </span>
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="successMessage"
+    class="message success-message" role="status">
+
+    <span class="message-icon">
+      ✓
+    </span>
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Loading -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="loading"
+    class="card loading-card" role="status">
+
+    <div class="spinner"></div>
+
+    <div>
+
+      <strong>
+        Loading appeals
+      </strong>
+
+      <span>
+        Please wait...
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Empty -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !loading &&
+      !appeals.length
+    "
+    class="card empty-state">
+
+    <div class="empty-icon">
+      APL
+    </div>
+
+    <h3>
+      No Appeals
+    </h3>
+
+    <p>
+      No appeals have been added
+      for this product.
+    </p>
+
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="openCreateModal()">
+      + Add First Appeal
+    </button>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Existing Appeals -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading &&
+      appeals.length
+    ">
+
+    <!-- =================================================== -->
+    <!-- Appeal Tabs -->
+    <!-- =================================================== -->
+
+    <section class="tabs-wrapper">
+
+      <div class="tabs">
+
+        <button
+          *ngFor="
+            let appeal of appeals;
+            let index = index
+          "
+          type="button"
+          class="appeal-tab"
+          [attr.aria-pressed]="
+            selectedAppealId ===
+            appeal.id
+          "
+          [class.active]="
+            selectedAppealId ===
+            appeal.id
+          "
+          (click)="
+            selectAppeal(
+              appeal.id
+            )
+          ">
+
+          <span class="tab-number">
+            {{ index + 1 }}
+          </span>
+
+
+          <span class="tab-content">
+
+            <strong>
+              Appeal {{ index + 1 }}
+            </strong>
+
+            <small>
+              {{ appeal.appealType.name }}
+            </small>
+
+          </span>
+
+
+          <span
+            class="tab-status"
+            [class.approved]="
+              appeal.approval
+            ">
+
+            {{
+              appeal.approval
+                ? 'Approved'
+                : 'Pending'
+            }}
+
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="appeal-tab add-tab"
+          [disabled]="saving"
+          (click)="openCreateModal()">
+
+          <span class="tab-number">
+            +
+          </span>
+
+          <span class="tab-content">
+
+            <strong>
+              Add Appeal
+            </strong>
+
+            <small>
+              Create another appeal
+            </small>
+
+          </span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- Selected Appeal -->
+    <!-- =================================================== -->
+
+    <ng-container
+      *ngIf="
+        selectedAppeal
+          as appeal
+      ">
+
+      <!-- ================================================= -->
+      <!-- Summary -->
+      <!-- ================================================= -->
+
+      <section class="summary-grid">
+
+        <article class="card summary-card">
+
+          <div class="summary-icon">
+            TYPE
+          </div>
+
+          <div>
+
+            <span>
+              Appeal Type
+            </span>
+
+            <strong>
+              {{ appeal.appealType.name }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="card summary-card">
+
+          <div class="summary-icon">
+            DATE
+          </div>
+
+          <div>
+
+            <span>
+              Appeal Date
+            </span>
+
+            <strong>
+              {{ appeal.appealDate }}
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="card summary-card">
+
+          <div
+            class="summary-icon"
+            [class.approved-icon]="
+              appeal.approval
+            ">
+            APR
+          </div>
+
+          <div>
+
+            <span>
+              Status
+            </span>
+
+            <strong>
+              {{
+                appeal.approval
+                  ? 'Approved'
+                  : 'Pending Approval'
+              }}
+            </strong>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Appeal Information -->
+      <!-- ================================================= -->
+
+      <section class="card appeal-info-card">
+
+        <div class="section-header collapsible-header">
+
+          <button
+            type="button"
+            class="section-title-button"
+            (click)="toggleAppealDetails()">
+
+            <span
+              class="expand-chevron"
+              [class.expanded]="
+                appealDetailsExpanded
+              ">
+              ›
+            </span>
+
+
+            <div>
+
+              <span class="page-eyebrow">
+                Appeal Details
+              </span>
+
+              <h3>
+                Appeal Information
+              </h3>
+
+              <p
+                *ngIf="
+                  !appealDetailsExpanded
+                "
+                class="collapsed-summary">
+                {{ appeal.initiator }}
+                ·
+                {{ appeal.appealType.name }}
+                ·
+                {{ appeal.appealDate }}
+              </p>
+
+            </div>
+
+          </button>
+
+
+          <div class="section-actions">
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleAppealDetails()">
+
+              {{
+                appealDetailsExpanded
+                  ? 'Collapse'
+                  : 'Expand'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              [disabled]="saving"
+              (click)="openEditModal()">
+              Edit Details
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="appealDetailsExpanded"
+          class="collapsible-content">
+
+          <div class="info-grid">
+
+            <div class="info-item">
+
+              <span>
+                Initiator
+              </span>
+
+              <strong>
+                {{ appeal.initiator }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Appeal Type
+              </span>
+
+              <strong>
+                {{ appeal.appealType.name }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Appeal Date
+              </span>
+
+              <strong>
+                {{ appeal.appealDate }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item full">
+
+              <span>
+                Notes
+              </span>
+
+              <p>
+                {{
+                  appeal.notes ||
+                  'No appeal notes.'
+                }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Appeal Approval -->
+      <!-- ================================================= -->
+
+      <section
+        class="card approval-card"
+        [class.approved-card]="
+          appeal.approval
+        ">
+
+        <div class="section-header collapsible-header">
+
+          <button
+            type="button"
+            class="section-title-button"
+            (click)="toggleAppealApproval()">
+
+            <span
+              class="expand-chevron"
+              [class.expanded]="
+                appealApprovalExpanded
+              ">
+              ›
+            </span>
+
+
+            <div>
+
+              <span class="page-eyebrow">
+                Authority Decision
+              </span>
+
+              <h3>
+                Appeal Approval
+              </h3>
+
+              <p
+                *ngIf="
+                  !appealApprovalExpanded
+                "
+                class="collapsed-summary">
+
+                {{
+                  appeal.approval
+                    ? 'Approved on ' +
+                      appeal.approval.date
+                    : 'Approval pending'
+                }}
+
+              </p>
+
+            </div>
+
+          </button>
+
+
+          <div class="section-actions">
+
+            <span
+              class="section-status"
+              [class.approved]="
+                appeal.approval
+              ">
+
+              {{
+                appeal.approval
+                  ? 'Approved'
+                  : 'Pending'
+              }}
+
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleAppealApproval()">
+
+              {{
+                appealApprovalExpanded
+                  ? 'Collapse'
+                  : 'Expand'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-primary small"
+              [disabled]="saving"
+              (click)="openAppealApprovalModal()">
+
+              {{
+                appeal.approval
+                  ? 'Update Approval'
+                  : '+ Approve'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="appealApprovalExpanded"
+          class="collapsible-content">
+
+          <ng-container
+            *ngIf="
+              appeal.approval
+                as approval
+            ">
+
+            <div class="approval-badge">
+              Approved
+            </div>
+
+
+            <div class="approval-info-grid">
+
+              <div>
+
+                <span>
+                  Approval Date
+                </span>
+
+                <strong>
+                  {{ approval.date }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Approval File
+                </span>
+
+                <strong>
+                  {{
+                    approval
+                      .attachment
+                      .fileName
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div
+              *ngIf="
+                approval.attachment.notes
+              "
+              class="approval-notes">
+
+              {{
+                approval
+                  .attachment
+                  .notes
+              }}
+
+            </div>
+
+
+            <div class="document-actions">
+
+              <button
+                *ngIf="
+                  isPdf(
+                    approval
+                      .attachment
+                      .fileName
+                  )
+                "
+                type="button"
+                class="btn btn-secondary small"
+                (click)="
+                  previewPdf(
+                    approval
+                      .attachment
+                      .attachmentId,
+
+                    approval
+                      .attachment
+                      .fileName
+                  )
+                ">
+                Preview
+              </button>
+
+
+              <button
+                *ngIf="
+                  !isPdf(
+                    approval
+                      .attachment
+                      .fileName
+                  )
+                "
+                type="button"
+                class="btn btn-secondary small"
+                (click)="
+                  openAttachment(
+                    approval
+                      .attachment
+                      .attachmentId,
+
+                    approval
+                      .attachment
+                      .fileName
+                  )
+                ">
+                Open
+              </button>
+
+
+              <button
+                type="button"
+                class="btn btn-secondary small"
+                (click)="
+                  downloadAttachment(
+                    approval
+                      .attachment
+                      .attachmentId,
+
+                    approval
+                      .attachment
+                      .fileName
+                  )
+                ">
+                Download
+              </button>
+
+
+              <button
+                type="button"
+                class="btn btn-danger-outline small"
+                [disabled]="saving"
+                (click)="removeAppealApproval()">
+                Remove Approval
+              </button>
+
+            </div>
+
+          </ng-container>
+
+
+          <div
+            *ngIf="!appeal.approval"
+            class="approval-empty">
+
+            <div class="empty-icon">
+              APR
+            </div>
+
+            <strong>
+              Appeal not approved yet
+            </strong>
+
+            <span>
+              Add the approval date
+              and authority document.
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Requirements -->
+      <!-- ================================================= -->
+
+      <section class="card requirements-section">
+
+        <div class="section-header collapsible-header">
+
+          <button
+            type="button"
+            class="section-title-button"
+            (click)="toggleRequirementsSection()">
+
+            <span
+              class="expand-chevron"
+              [class.expanded]="
+                requirementsExpanded
+              ">
+              ›
+            </span>
+
+
+            <div>
+
+              <span class="page-eyebrow">
+                Appeal Follow-up
+              </span>
+
+
+              <div class="title-with-count">
+
+                <h3>
+                  Appeal Requirements
+                </h3>
+
+                <span class="requirements-count">
+                  {{ appeal.requirements.length }}
+                </span>
+
+              </div>
+
+
+              <p>
+                Track requirements, deadlines,
+                departments and approvals.
+              </p>
+
+            </div>
+
+          </button>
+
+
+          <div class="requirements-actions">
+
+            <span
+              class="requirement-summary-badge approved">
+
+              ✓
+              {{ approvedRequirementsCount }}
+              Approved
+
+            </span>
+
+
+            <span
+              class="requirement-summary-badge pending">
+
+              !
+              {{ pendingRequirementsCount }}
+              Pending
+
+            </span>
+
+
+            <span
+              class="requirement-summary-badge documents">
+
+              📎
+              {{ requirementsWithAttachmentsCount }}
+              Files
+
+            </span>
+
+
+            <button
+              *ngIf="
+                requirementsExpanded &&
+                appeal.requirements.length
+              "
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleAllRequirements()">
+
+              {{
+                allRequirementsExpanded
+                  ? 'Collapse All'
+                  : 'Expand All'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-secondary small"
+              (click)="toggleRequirementsSection()">
+
+              {{
+                requirementsExpanded
+                  ? 'Collapse'
+                  : 'Expand'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="saving"
+              (click)="openAddRequirementModal()">
+              + Add Requirement
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- Collapsible Requirements Body -->
+        <!-- ================================================= -->
+
+        <div
+          *ngIf="requirementsExpanded"
+          class="collapsible-content">
+
+          <!-- Empty -->
+
+          <div
+            *ngIf="
+              !appeal.requirements.length
+            "
+            class="requirements-empty">
+
+            <div class="empty-icon">
+              REQ
+            </div>
+
+            <strong>
+              No Requirements
+            </strong>
+
+            <span>
+              This appeal currently
+              has no requirements.
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn-primary small"
+              (click)="openAddRequirementModal()">
+              Add First Requirement
+            </button>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- Requirement List -->
+          <!-- ================================================= -->
+
+          <div
+            *ngIf="
+              appeal.requirements.length
+            "
+            class="requirements-list">
+
+            <article
+              *ngFor="
+                let requirement
+                of appeal.requirements;
+                let index = index
+              "
+              class="requirement-card"
+              [class.expanded]="
+                isRequirementExpanded(
+                  requirement.id
+                )
+              ">
+
+              <!-- ============================================= -->
+              <!-- Compact Header -->
+              <!-- ============================================= -->
+
+              <div class="requirement-header">
+
+                <button
+                  type="button"
+                  class="requirement-title-button"
+                  (click)="
+                    toggleRequirement(
+                      requirement.id
+                    )
+                  ">
+
+                  <span
+                    class="requirement-chevron"
+                    [class.expanded]="
+                      isRequirementExpanded(
+                        requirement.id
+                      )
+                    ">
+                    ›
+                  </span>
+
+
+                  <div class="requirement-number">
+                    {{ index + 1 }}
+                  </div>
+
+
+                  <div class="requirement-title">
+
+                    <span class="requirement-label">
+                      Requirement {{ index + 1 }}
+                    </span>
+
+                    <h4>
+                      {{ requirement.name }}
+                    </h4>
+
+
+                    <div class="requirement-quick-info">
+
+                      <span>
+                        Due:
+                        <strong>
+                          {{ requirement.deadline }}
+                        </strong>
+                      </span>
+
+
+                      <span>
+                        Department:
+                        <strong>
+                          {{
+                            requirement
+                              .responsibleDepartment
+                              .name
+                          }}
+                        </strong>
+                      </span>
+
+
+                      <span
+                        *ngIf="
+                          requirement
+                            .requirementAttachment
+                        "
+                        class="quick-file">
+                        📎 Document
+                      </span>
+
+
+                      <span
+                        *ngIf="
+                          requirement.notes
+                        "
+                        class="quick-note">
+                        📝 Notes
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </button>
+
+
+                <div class="requirement-header-actions">
+
+                  <span
+                    class="requirement-status"
+                    [class.approved]="
+                      requirement.approval
+                    ">
+
+                    {{
+                      requirement.approval
+                        ? 'Approved'
+                        : 'Pending'
+                    }}
+
+                  </span>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    (click)="
+                      toggleRequirement(
+                        requirement.id
+                      )
+                    ">
+
+                    {{
+                      isRequirementExpanded(
+                        requirement.id
+                      )
+                        ? 'Hide Details'
+                        : 'View Details'
+                    }}
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    [disabled]="saving"
+                    (click)="
+                      openEditRequirementModal(
+                        requirement
+                      )
+                    ">
+                    Edit
+                  </button>
+
+                </div>
+
+              </div>
+
+
+              <!-- ============================================= -->
+              <!-- Expanded Requirement Body -->
+              <!-- ============================================= -->
+
+              <div
+                *ngIf="
+                  isRequirementExpanded(
+                    requirement.id
+                  )
+                "
+                class="requirement-body">
+
+                <!-- Metadata -->
+
+                <div class="requirement-metadata">
+
+                  <div>
+
+                    <span>
+                      Deadline
+                    </span>
+
+                    <strong>
+                      {{ requirement.deadline }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Responsible Department
+                    </span>
+
+                    <strong>
+                      {{
+                        requirement
+                          .responsibleDepartment
+                          .name
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <!-- Notes -->
+
+                <div
+                  *ngIf="requirement.notes"
+                  class="requirement-notes">
+
+                  <span>
+                    Notes
+                  </span>
+
+                  <p>
+                    {{ requirement.notes }}
+                  </p>
+
+                </div>
+
+
+                <!-- =========================================== -->
+                <!-- Attachment + Approval -->
+                <!-- =========================================== -->
+
+                <div class="requirement-detail-grid">
+
+                  <!-- ========================================= -->
+                  <!-- Requirement Attachment -->
+                  <!-- ========================================= -->
+
+                  <div class="detail-card">
+
+                    <div class="detail-card-header">
+
+                      <div>
+
+                        <span>
+                          Supporting Document
+                        </span>
+
+                        <strong>
+                          Requirement Attachment
+                        </strong>
+
+                      </div>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary small"
+                        [disabled]="saving"
+                        (click)="
+                          openRequirementAttachmentModal(
+                            requirement
+                          )
+                        ">
+
+                        {{
+                          requirement.requirementAttachment
+                            ? 'Replace'
+                            : '+ Add'
+                        }}
+
+                      </button>
+
+                    </div>
+
+
+                    <ng-container
+                      *ngIf="
+                        requirement.requirementAttachment
+                          as attachment
+                      ">
+
+                      <div class="file-row">
+
+                        <div class="file-icon">
+                          DOC
+                        </div>
+
+
+                        <div>
+
+                          <strong>
+                            {{ attachment.fileName }}
+                          </strong>
+
+                          <small>
+                            {{
+                              attachment.notes ||
+                              'No attachment notes'
+                            }}
+                          </small>
+
+                        </div>
+
+                      </div>
+
+
+                      <div class="document-actions">
+
+                        <button
+                          *ngIf="
+                            isPdf(
+                              attachment.fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            previewPdf(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Preview
+                        </button>
+
+
+                        <button
+                          *ngIf="
+                            !isPdf(
+                              attachment.fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            openAttachment(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Open
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            downloadAttachment(
+                              attachment.attachmentId,
+                              attachment.fileName
+                            )
+                          ">
+                          Download
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-danger-outline small"
+                          [disabled]="saving"
+                          (click)="
+                            removeRequirementAttachment(
+                              requirement
+                            )
+                          ">
+                          Remove
+                        </button>
+
+                      </div>
+
+                    </ng-container>
+
+
+                    <div
+                      *ngIf="
+                        !requirement
+                          .requirementAttachment
+                      "
+                      class="detail-empty">
+
+                      <span class="detail-empty-icon">
+                        📎
+                      </span>
+
+                      No requirement attachment.
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- ========================================= -->
+                  <!-- Requirement Approval -->
+                  <!-- ========================================= -->
+
+                  <div
+                    class="detail-card"
+                    [class.approved-detail]="
+                      requirement.approval
+                    ">
+
+                    <div class="detail-card-header">
+
+                      <div>
+
+                        <span>
+                          Authority Decision
+                        </span>
+
+                        <strong>
+                          Requirement Approval
+                        </strong>
+
+                      </div>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-primary small"
+                        [disabled]="saving"
+                        (click)="
+                          openRequirementApprovalModal(
+                            requirement
+                          )
+                        ">
+
+                        {{
+                          requirement.approval
+                            ? 'Update'
+                            : 'Approve'
+                        }}
+
+                      </button>
+
+                    </div>
+
+
+                    <ng-container
+                      *ngIf="
+                        requirement.approval
+                          as requirementApproval
+                      ">
+
+                      <div class="approval-info-grid">
+
+                        <div>
+
+                          <span>
+                            Approval Date
+                          </span>
+
+                          <strong>
+                            {{
+                              requirementApproval.date
+                            }}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Approval File
+                          </span>
+
+                          <strong>
+                            {{
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            }}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+
+                      <div
+                        *ngIf="
+                          requirementApproval
+                            .attachment
+                            .notes
+                        "
+                        class="approval-notes">
+
+                        {{
+                          requirementApproval
+                            .attachment
+                            .notes
+                        }}
+
+                      </div>
+
+
+                      <div class="document-actions">
+
+                        <button
+                          *ngIf="
+                            isPdf(
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            previewPdf(
+                              requirementApproval
+                                .attachment
+                                .attachmentId,
+
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Preview
+                        </button>
+
+
+                        <button
+                          *ngIf="
+                            !isPdf(
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            )
+                          "
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            openAttachment(
+                              requirementApproval
+                                .attachment
+                                .attachmentId,
+
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Open
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-secondary small"
+                          (click)="
+                            downloadAttachment(
+                              requirementApproval
+                                .attachment
+                                .attachmentId,
+
+                              requirementApproval
+                                .attachment
+                                .fileName
+                            )
+                          ">
+                          Download
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn btn-danger-outline small"
+                          [disabled]="saving"
+                          (click)="
+                            removeRequirementApproval(
+                              requirement
+                            )
+                          ">
+                          Remove Approval
+                        </button>
+
+                      </div>
+
+                    </ng-container>
+
+
+                    <div
+                      *ngIf="
+                        !requirement.approval
+                      "
+                      class="detail-empty">
+
+                      <span class="detail-empty-icon">
+                        ✓
+                      </span>
+
+                      Requirement has not been approved.
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <!-- =========================================== -->
+                <!-- Requirement Footer -->
+                <!-- =========================================== -->
+
+                <footer class="requirement-footer">
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary small"
+                    [disabled]="saving"
+                    (click)="
+                      openEditRequirementModal(
+                        requirement
+                      )
+                    ">
+                    Edit Requirement
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="btn btn-danger small"
+                    [disabled]="saving"
+                    (click)="
+                      deleteRequirement(
+                        requirement
+                      )
+                    ">
+                    Delete Requirement
+                  </button>
+
+                </footer>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- Danger Zone -->
+      <!-- ================================================= -->
+
+      <section class="card danger-zone">
+
+        <div>
+
+          <span class="danger-label">
+            Danger Zone
+          </span>
+
+          <strong>
+            Delete Appeal
+          </strong>
+
+          <p>
+            Deleting this appeal also deletes
+            all its requirements.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          [disabled]="saving"
+          (click)="deleteAppeal()">
+          Delete Appeal
+        </button>
+
+      </section>
+
+    </ng-container>
+
+  </ng-container>
+
+
+  <!-- ===================================================== -->
+  <!-- CREATE APPEAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="createModalOpen"
+    class="modal-overlay"
+    (click)="closeCreateModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            New Appeal
+          </span>
+
+          <h3>
+            Create Appeal
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeCreateModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Initiator
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="createInitiator"
+            placeholder="Enter appeal initiator..."
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Appeal Type
+            <span class="required">*</span>
+          </label>
+
+
+          <app-creatable-lookup
+            placeholder="Search or create appeal type..."
+            [items]="appealTypes"
+            [(selectedId)]="createAppealTypeId"
+            [disabled]="
+              saving ||
+              loadingAppealTypes
+            "
+            [creating]="creatingAppealType"
+            (createRequested)="
+              createAppealType(
+                $event
+              )
+            ">
+          </app-creatable-lookup>
+
+
+          <small class="field-help">
+            Select an existing type or
+            type a new value to create it.
+          </small>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Appeal Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="createAppealDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="createNotes"
+            placeholder="Optional appeal notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="saving"
+          (click)="closeCreateModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            creatingAppealType ||
+            !createInitiator.trim() ||
+            !createAppealTypeId ||
+            !createAppealDate
+          "
+          (click)="createAppeal()">
+          Create Appeal
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- EDIT APPEAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="editModalOpen"
+    class="modal-overlay"
+    (click)="closeEditModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Appeal
+          </span>
+
+          <h3>
+            Edit Appeal
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeEditModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Initiator
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="editInitiator"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Appeal Type
+            <span class="required">*</span>
+          </label>
+
+
+          <app-creatable-lookup
+            placeholder="Search or create appeal type..."
+            [items]="appealTypes"
+            [(selectedId)]="editAppealTypeId"
+            [disabled]="
+              saving ||
+              loadingAppealTypes
+            "
+            [creating]="creatingAppealType"
+            (createRequested)="
+              createAppealType(
+                $event
+              )
+            ">
+          </app-creatable-lookup>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Appeal Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="editAppealDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="editNotes"
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeEditModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !editInitiator.trim() ||
+            !editAppealTypeId ||
+            !editAppealDate
+          "
+          (click)="saveAppealDetails()">
+          Save Changes
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MAIN APPEAL APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      appealApprovalModalOpen &&
+      selectedAppeal
+    "
+    class="modal-overlay"
+    (click)="closeAppealApprovalModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Appeal Approval
+          </span>
+
+          <h3>
+            {{
+              selectedAppeal.approval
+                ? 'Update Appeal Approval'
+                : 'Approve Appeal'
+            }}
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeAppealApprovalModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Approval Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="appealApprovalDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Document
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onAppealApprovalFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  appealApprovalFile?.name ||
+                  (
+                    selectedAppeal.approval
+                      ? selectedAppeal
+                          .approval
+                          .attachment
+                          .fileName
+                      : 'Choose approval document'
+                  )
+                }}
+              </strong>
+
+
+              <span>
+                {{
+                  selectedAppeal.approval
+                    ? 'Leave unchanged to keep current file.'
+                    : 'Approval document is required.'
+                }}
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="appealApprovalNotes"
+            placeholder="Optional approval notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeAppealApprovalModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !appealApprovalDate ||
+            (
+              !selectedAppeal.approval &&
+              !appealApprovalFile
+            )
+          "
+          (click)="saveAppealApproval()">
+          Save Approval
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ADD / EDIT REQUIREMENT MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="requirementModalOpen"
+    class="modal-overlay"
+    (click)="closeRequirementModal()">
+
+    <div
+      class="modal large-modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Appeal Requirement
+          </span>
+
+          <h3>
+            {{
+              requirementFormMode === 'add'
+                ? 'Add Requirement'
+                : 'Edit Requirement'
+            }}
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Requirement
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="requirementName"
+            placeholder="Enter requirement..."
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Deadline
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="requirementDeadline"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <!-- Department -->
+
+        <div class="field">
+
+          <label>
+            Responsible Department
+            <span class="required">*</span>
+          </label>
+
+
+          <div class="department-search">
+
+            <input
+              type="text"
+              [value]="departmentSearch"
+              autocomplete="off"
+              placeholder="Search department..."
+              [disabled]="saving"
+              (focus)="openDepartmentDropdown()"
+              (input)="
+                onDepartmentSearch(
+                  $any($event.target).value
+                )
+              " />
+
+
+            <div
+              *ngIf="departmentDropdownOpen"
+              class="department-dropdown">
+
+              <div
+                *ngIf="loadingDepartments"
+                class="dropdown-state">
+                Searching departments...
+              </div>
+
+
+              <button
+                *ngFor="
+                  let department
+                  of departments
+                "
+                type="button"
+                class="department-option"
+                (click)="
+                  selectDepartment(
+                    department
+                  )
+                ">
+
+                <span class="department-icon">
+                  DEP
+                </span>
+
+                <strong>
+                  {{ department.name }}
+                </strong>
+
+                <span
+                  *ngIf="
+                    department.id ===
+                    requirementDepartmentId
+                  ">
+                  ✓
+                </span>
+
+              </button>
+
+
+              <div
+                *ngIf="
+                  !loadingDepartments &&
+                  !departments.length
+                "
+                class="dropdown-state">
+                No departments found.
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <small
+            *ngIf="
+              requirementDepartmentId
+            "
+            class="selected-value">
+
+            Selected:
+            {{ requirementDepartmentName }}
+
+          </small>
+
+        </div>
+
+
+        <!-- Initial Requirement Attachment -->
+
+        <div
+          *ngIf="
+            requirementFormMode === 'add'
+          "
+          class="field">
+
+          <label>
+            Requirement Attachment
+
+            <span class="optional">
+              Optional
+            </span>
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementFile?.name ||
+                  'Choose supporting document'
+                }}
+              </strong>
+
+              <span>
+                Optional requirement attachment.
+              </span>
+
+            </div>
+
+          </label>
+
+
+          <button
+            *ngIf="requirementFile"
+            type="button"
+            class="text-danger-button"
+            (click)="removeSelectedRequirementFile()">
+            Remove selected file
+          </button>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementNotes"
+            placeholder="Optional requirement notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementName.trim() ||
+            !requirementDeadline ||
+            !requirementDepartmentId
+          "
+          (click)="saveRequirement()">
+
+          {{
+            requirementFormMode === 'add'
+              ? 'Add Requirement'
+              : 'Save Changes'
+          }}
+
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REQUIREMENT ATTACHMENT MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      requirementAttachmentModalOpen &&
+      requirementAttachmentTarget
+    "
+    class="modal-overlay"
+    (click)="closeRequirementAttachmentModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Requirement Attachment
+          </span>
+
+          <h3>
+            {{
+              requirementAttachmentTarget
+                .requirementAttachment
+                ? 'Replace Attachment'
+                : 'Add Attachment'
+            }}
+          </h3>
+
+          <p>
+            {{ requirementAttachmentTarget.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementAttachmentModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Document
+            <span class="required">*</span>
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementAttachmentFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementAttachmentFile?.name ||
+                  'Choose document'
+                }}
+              </strong>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Attachment Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementAttachmentNotes"
+            placeholder="Optional notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementAttachmentModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementAttachmentFile
+          "
+          (click)="saveRequirementAttachment()">
+          Save Attachment
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REQUIREMENT APPROVAL MODAL -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      requirementApprovalModalOpen &&
+      requirementApprovalTarget
+    "
+    class="modal-overlay"
+    (click)="closeRequirementApprovalModal()">
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Requirement Approval
+          </span>
+
+          <h3>
+            {{
+              requirementApprovalTarget.approval
+                ? 'Update Approval'
+                : 'Approve Requirement'
+            }}
+          </h3>
+
+          <p>
+            {{ requirementApprovalTarget.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close" aria-label="Close dialog"
+          (click)="closeRequirementApprovalModal()">
+          ✕
+        </button>
+
+      </header>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label>
+            Approval Date
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="requirementApprovalDate"
+            [disabled]="saving" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Document
+          </label>
+
+
+          <label class="file-picker">
+
+            <input
+              type="file"
+              [disabled]="saving"
+              (change)="
+                onRequirementApprovalFileSelected(
+                  $event
+                )
+              " />
+
+
+            <div class="upload-icon">
+              ↑
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{
+                  requirementApprovalFile?.name ||
+                  (
+                    requirementApprovalTarget.approval
+                      ? requirementApprovalTarget
+                          .approval
+                          .attachment
+                          .fileName
+                      : 'Choose approval document'
+                  )
+                }}
+              </strong>
+
+
+              <span>
+                {{
+                  requirementApprovalTarget.approval
+                    ? 'Leave unchanged to keep existing document.'
+                    : 'Approval document is required.'
+                }}
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Approval Notes
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="requirementApprovalNotes"
+            placeholder="Optional approval notes..."
+            [disabled]="saving">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeRequirementApprovalModal()">
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving ||
+            !requirementApprovalDate ||
+            (
+              !requirementApprovalTarget.approval &&
+              !requirementApprovalFile
+            )
+          "
+          (click)="saveRequirementApproval()">
+          Save Approval
+        </button>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PDF VIEWER -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="pdfViewerOpen"
+    class="pdf-overlay"
+    (click)="closePdfViewer()">
+
+    <div
+      class="pdf-viewer"
+      (click)="$event.stopPropagation()">
+
+      <header class="pdf-header">
+
+        <div>
+
+          <strong>
+            {{ pdfViewerFileName }}
+          </strong>
+
+          <span>
+            Document Preview
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary small"
+          (click)="closePdfViewer()">
+          ✕ Close
+        </button>
+
+      </header>
+
+
+      <div
+        *ngIf="pdfViewerLoading"
+        class="pdf-loading">
+
+        <div class="spinner"></div>
+
+        Loading document...
+
+      </div>
+
+
+      <iframe
+        *ngIf="
+          !pdfViewerLoading &&
+          pdfViewerUrl
+        "
+        class="pdf-frame"
+        [src]="pdfViewerUrl">
+      </iframe>
+
+    </div>
+
+  </div>
+
+</section>
