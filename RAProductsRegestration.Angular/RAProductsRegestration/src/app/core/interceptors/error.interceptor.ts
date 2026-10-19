@@ -83,7 +83,13 @@ export const errorInterceptor:
               error
             );
 
-
+if (
+  error.status === 401
+) {
+  return throwError(
+    () => error
+  );
+}
           toastr.error(
             message,
             title,

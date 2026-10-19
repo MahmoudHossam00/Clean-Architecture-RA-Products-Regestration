@@ -23,7 +23,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/product-licenses")]
 public sealed class ProductLicensesController(
     ISender sender)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.EntityFrameworkCore;
 using RAProductsRegestration.Application.Common.Interfaces.Persistence;
 using RAProductsRegestration.Domain.Common;
 using RAProductsRegestration.Infrastructure.Data;
@@ -13,7 +14,7 @@ internal class Repository<TAggregate>(
 {
     private readonly DbSet<TAggregate> _dbSet =
         context.Set<TAggregate>();
-
+   
     public async Task<TAggregate?> GetByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default)

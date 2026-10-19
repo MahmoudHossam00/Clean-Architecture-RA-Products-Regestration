@@ -1,0 +1,161 @@
+:host {
+  display: block;
+}
+
+.admin-page {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 3px 0 8px;
+}
+
+.page-header p {
+  color: #667085;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #28698f;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.card {
+  padding: 26px;
+  border: 1px solid #e3e8ee;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+  gap: 18px;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field.full {
+  width: 100%;
+}
+
+.field label,
+.roles-title {
+  display: block;
+  margin-bottom: 7px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d4dce4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.field small {
+  display: block;
+  margin-top: 5px;
+  color: #667085;
+}
+
+.employee-preview {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 25px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #f5f8fa;
+}
+
+.employee-preview span,
+.employee-preview strong {
+  display: block;
+}
+
+.employee-preview span {
+  color: #667085;
+  font-size: 11px;
+}
+
+.employee-preview strong {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.roles {
+  margin: 10px 0 24px;
+}
+
+.role-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border: 1px solid #d8e0e7;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.primary-button,
+.secondary-button {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 17px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #28698f;
+  color: #fff;
+}
+
+.secondary-button {
+  background: #edf3f7;
+  color: #28698f;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (
+  max-width: 800px
+) {
+
+  .form-grid,
+  .employee-preview {
+    grid-template-columns: 1fr;
+  }
+}

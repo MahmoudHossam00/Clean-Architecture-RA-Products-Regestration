@@ -8,7 +8,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers
 {
-    [ApiController]
+    [ApiController][Authorize]
     [Route("[controller]")]
     public class CTDSyncController(
     ISender sender)

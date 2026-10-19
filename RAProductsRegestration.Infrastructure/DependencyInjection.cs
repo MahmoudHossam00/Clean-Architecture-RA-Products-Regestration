@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using RAProductsRegestration.Application.Common.Interfaces.Files;
+using RAProductsRegestration.Application.Common.Interfaces.Identity;
 using RAProductsRegestration.Application.Common.Interfaces.Integrations.CTD;
 using RAProductsRegestration.Application.Common.Interfaces.Integrations.JDE.Suppliers;
 using RAProductsRegestration.Application.Common.Interfaces.Persistence;
@@ -13,6 +17,8 @@ using RAProductsRegestration.Infrastructure.Data.Interceptors;
 using RAProductsRegestration.Infrastructure.Data.Queries;
 using RAProductsRegestration.Infrastructure.Data.Repositories;
 using RAProductsRegestration.Infrastructure.Files;
+using RAProductsRegestration.Infrastructure.Identity;
+
 //using Microsoft.Extensions.Options.ConfigurationExtensions;
 
 
@@ -21,6 +27,8 @@ using RAProductsRegestration.Infrastructure.Integrations.CTD;
 using RAProductsRegestration.Infrastructure.Integrations.JDE.Suppliers;
 using RAProductsRegestration.Infrastructure.Repositories;
 using System.Configuration;
+using System.Security.Claims;
+using System.Text;
 //using RAProductsRegestration.Infrastructure.Repositories;
 
 namespace RAProductsRegestration.Infrastructure;
@@ -31,15 +39,19 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddInfrastructureServices(configuration).AddDatabase(configuration).AddCTDIntegration(configuration)
-            .AddJdeIntegration( configuration);
+        services
+            .AddInfrastructureServices(configuration)
+            .AddDatabase(configuration)
+            .AddCTDIntegration(configuration)
+            .AddJwtAuthentication(configuration)
+            .AddJdeIntegration(configuration);
 
         return services;
     }
 
     private static IServiceCollection AddDatabase(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    this IServiceCollection services,
+    IConfiguration configuration)
     {
         var connectionString =
             configuration.GetConnectionString(
@@ -48,7 +60,10 @@ public static class DependencyInjection
                 "Connection string " +
                 "'DefaultConnection' was not found.");
 
-        services.AddScoped<AuditableEntityInterceptor>();
+
+        services.AddScoped<
+            AuditableEntityInterceptor>();
+
 
         services.AddDbContext<ApplicationDbContext>(
             (serviceProvider, options) =>
@@ -58,30 +73,209 @@ public static class DependencyInjection
                         .GetRequiredService<
                             AuditableEntityInterceptor>();
 
-                options.UseSqlServer(
-                    connectionString,
-                    sqlServerOptions =>
-                    {
-                        sqlServerOptions.MigrationsAssembly(
-                            typeof(ApplicationDbContext)
-                                .Assembly
-                                .FullName);
 
-                        sqlServerOptions.EnableRetryOnFailure(
-                            maxRetryCount: 5,
-                            maxRetryDelay:
-                                TimeSpan.FromSeconds(10),
-                            errorNumbersToAdd: null);
-                    }).AddInterceptors(auditableInterceptor);
+                options
+                    .UseSqlServer(
+                        connectionString,
+                        sqlServerOptions =>
+                        {
+                            sqlServerOptions.MigrationsAssembly(
+                                typeof(ApplicationDbContext)
+                                    .Assembly
+                                    .FullName);
+
+                            sqlServerOptions.EnableRetryOnFailure(
+                                maxRetryCount: 5,
+                                maxRetryDelay:
+                                    TimeSpan.FromSeconds(10),
+                                errorNumbersToAdd: null);
+                        })
+                    .AddInterceptors(
+                        auditableInterceptor);
             });
+
 
         services.AddScoped<IUnitOfWork>(
             serviceProvider =>
                 serviceProvider
-                    .GetRequiredService<ApplicationDbContext>());
+                    .GetRequiredService<
+                        ApplicationDbContext>());
+
+
+        // =========================================================
+        // ASP.NET Identity
+        // =========================================================
+
+        services
+            .AddIdentityCore<AppUser>(
+                options =>
+                {
+                    options.User
+                        .RequireUniqueEmail =
+                        true;
+
+
+                    options.Password
+                        .RequiredLength =
+                        8;
+
+                    options.Password
+                        .RequireDigit =
+                        true;
+
+                    options.Password
+                        .RequireUppercase =
+                        true;
+
+                    options.Password
+                        .RequireLowercase =
+                        true;
+
+                    options.Password
+                        .RequireNonAlphanumeric =
+                        true;
+                })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<
+                ApplicationDbContext>();
+
+
+        // =========================================================
+        // JWT
+        // =========================================================
+
+        services.Configure<JwtSettings>(
+            configuration.GetSection(
+                JwtSettings.SectionName));
+
+
+        services.AddScoped<
+            JwtTokenProvider>();
+
+
+        services.AddScoped<
+            IIdentityService,
+            IdentityService>();
+
+
+        // =========================================================
+        // Initial Admin Configuration
+        // =========================================================
+
+        services.Configure<IdentitySeedSettings>(
+            configuration.GetSection(
+                IdentitySeedSettings.SectionName));
+
+
         return services;
     }
+    private static IServiceCollection AddJwtAuthentication(
+    this IServiceCollection services,
+    IConfiguration configuration)
+    {
+        var jwtSettings =
+            configuration
+                .GetSection(
+                    JwtSettings.SectionName)
+                .Get<JwtSettings>()
+            ?? throw new InvalidOperationException(
+                "JWT configuration was not found.");
 
+
+        if (
+            string.IsNullOrWhiteSpace(
+                jwtSettings.Key))
+        {
+            throw new InvalidOperationException(
+                "JWT signing key was not configured.");
+        }
+
+
+        if (
+            Encoding.UTF8
+                .GetByteCount(
+                    jwtSettings.Key) < 32)
+        {
+            throw new InvalidOperationException(
+                "JWT signing key must be " +
+                "at least 32 bytes long.");
+        }
+
+
+        services
+            .AddAuthentication(
+                options =>
+                {
+                    options.DefaultAuthenticateScheme =
+                        JwtBearerDefaults
+                            .AuthenticationScheme;
+
+                    options.DefaultChallengeScheme =
+                        JwtBearerDefaults
+                            .AuthenticationScheme;
+
+                    options.DefaultScheme =
+                        JwtBearerDefaults
+                            .AuthenticationScheme;
+                })
+            .AddJwtBearer(
+                options =>
+                {
+                    options.MapInboundClaims =
+                        false;
+
+
+                    options.TokenValidationParameters =
+                        new TokenValidationParameters
+                        {
+                            ValidateIssuer =
+                                true,
+
+                            ValidIssuer =
+                                jwtSettings.Issuer,
+
+
+                            ValidateAudience =
+                                true,
+
+                            ValidAudience =
+                                jwtSettings.Audience,
+
+
+                            ValidateIssuerSigningKey =
+                                true,
+
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(
+                                    Encoding.UTF8
+                                        .GetBytes(
+                                            jwtSettings.Key)),
+
+
+                            ValidateLifetime =
+                                true,
+
+
+                            ClockSkew =
+                                TimeSpan.FromMinutes(
+                                    1),
+
+
+                            NameClaimType =
+                                ClaimTypes.Name,
+
+
+                            RoleClaimType =
+                                ClaimTypes.Role
+                        };
+                });
+
+
+        services.AddAuthorization();
+
+
+        return services;
+    }
     private static IServiceCollection AddCTDIntegration(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -118,6 +312,14 @@ public static class DependencyInjection
     private static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,IConfiguration configuration)
     {
+        services.AddScoped<
+    IEmployeeExcelReader,
+    EmployeeExcelReader>();
+
+
+        services.AddScoped<
+            IEmployeeExcelTemplateGenerator,
+            EmployeeExcelTemplateGenerator>();
         services.AddScoped(
             typeof(IRepository<>),
             typeof(Repository<>));
@@ -166,6 +368,15 @@ public static class DependencyInjection
 
         services.AddSingleton(
             TimeProvider.System);
+
+
+        services.AddHttpContextAccessor();
+
+        services.AddScoped<
+            ICurrentUserService,
+            CurrentUserService>();
+
+
         return services;
 
     }

@@ -10,6 +10,8 @@ public interface IRepository<TAggregate>
         Guid id,
         CancellationToken cancellationToken = default);
 
+
+
     Task<TAggregate?> FirstOrDefaultAsync(
         Expression<Func<TAggregate, bool>> predicate,
         CancellationToken cancellationToken = default);

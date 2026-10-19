@@ -8,7 +8,7 @@ using RAProductsRegestration.Application.Features
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/promotional-material-types")]
 public sealed class PromotionalMaterialTypesController(
     ISender sender)

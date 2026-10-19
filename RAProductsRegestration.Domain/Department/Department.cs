@@ -27,7 +27,7 @@ public sealed class Department
         get;
         private set;
     } = null!;
-    public int ZenId
+    public long ZenId
     {
         get;
         private set;

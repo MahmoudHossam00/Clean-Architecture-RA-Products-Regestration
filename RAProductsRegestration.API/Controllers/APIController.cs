@@ -1,11 +1,13 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RAProductsRegestration.Application.Features.ActiveIngredients.Queries.GetAll;
 
 namespace RAProductsRegestration.API.Controllers
 {
-    [ApiController]
+    [ApiController][Authorize]
     [Route("[controller]")]
+    [Authorize]
     public sealed class ActiveIngredientsController(
         ISender sender)
         : ControllerBase

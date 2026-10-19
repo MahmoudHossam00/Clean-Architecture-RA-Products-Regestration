@@ -1,0 +1,116 @@
+<div class="first-login-page">
+
+  <div class="first-login-card">
+
+    <div class="icon">
+      🔐
+    </div>
+
+
+    <h1>
+      Change your temporary password
+    </h1>
+
+
+    <p class="description">
+      Before continuing to the
+      Product Registration system,
+      you must create your own password.
+    </p>
+
+
+    @if (errorMessage) {
+
+      <div class="error">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()">
+
+
+      <label>
+        Temporary password
+      </label>
+
+      <input
+        type="password"
+        formControlName="currentPassword"
+        autocomplete="current-password"
+      />
+
+
+      <label>
+        New password
+      </label>
+
+      <input
+        type="password"
+        formControlName="newPassword"
+        autocomplete="new-password"
+      />
+
+
+      <label>
+        Confirm new password
+      </label>
+
+      <input
+        type="password"
+        formControlName="confirmNewPassword"
+        autocomplete="new-password"
+      />
+
+
+      @if (
+        form.hasError(
+          'passwordMismatch'
+        ) &&
+        form.controls.confirmNewPassword
+          .touched
+      ) {
+
+        <small>
+          Passwords do not match.
+        </small>
+
+      }
+
+
+      <button
+        type="submit"
+        [disabled]="isSaving">
+
+        @if (isSaving) {
+
+          Updating password...
+
+        }
+        @else {
+
+          Change password
+          and continue
+
+        }
+
+      </button>
+
+    </form>
+
+
+    <button
+      type="button"
+      class="logout"
+      (click)="logout()">
+
+      Sign out
+
+    </button>
+
+  </div>
+
+</div>

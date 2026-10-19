@@ -2,6 +2,7 @@
 using RAProductsRegestration.API.Constants;
 using RAProductsRegestration.Application;
 using RAProductsRegestration.Infrastructure;
+using RAProductsRegestration.Infrastructure.Identity;
 using Scalar.AspNetCore;
 
 namespace RAProductsRegestration.API
@@ -21,7 +22,7 @@ namespace RAProductsRegestration.API
 
             // Apply pending migrations
             await app.Services.MigrateDatabaseAsync();
-
+            await app.Services.SeedIdentityAsync();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -35,6 +36,8 @@ namespace RAProductsRegestration.API
 
             app.UseCors(
     Frontend.FrontendCorsPolicy);
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

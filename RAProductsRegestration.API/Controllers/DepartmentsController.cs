@@ -7,7 +7,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/departments")]
 public sealed class DepartmentsController(
     ISender sender)

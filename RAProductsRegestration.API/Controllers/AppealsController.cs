@@ -54,6 +54,7 @@ namespace RAProductsRegestration.API.Controllers;
 
 
 [ApiController]
+[Authorize]
 [Route("api/appeals")]
 public sealed class AppealsController(
     ISender sender)

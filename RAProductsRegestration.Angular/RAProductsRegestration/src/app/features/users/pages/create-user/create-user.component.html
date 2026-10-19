@@ -1,0 +1,321 @@
+<div class="admin-page">
+
+  <div class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        Administration
+      </p>
+
+      <h1>
+        Create User
+      </h1>
+
+      <p>
+        Select an existing employee
+        and create their Product
+        Registration account.
+      </p>
+
+    </div>
+
+
+    <a
+      routerLink="/admin/employees"
+      class="secondary-button">
+
+      Employee Import
+
+    </a>
+
+  </div>
+
+
+  <section class="card">
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()">
+
+
+      <div class="field full">
+
+        <label>
+          Find Employee
+        </label>
+
+
+        <input
+          type="search"
+          [(ngModel)]="employeeSearch"
+          [ngModelOptions]="{
+            standalone: true
+          }"
+          placeholder="
+            Search by employee number,
+            name or email
+          "
+        />
+
+      </div>
+
+
+      <div class="field full">
+
+        <label>
+          Employee
+        </label>
+
+
+        <select
+          formControlName="employeeId"
+          (change)="employeeChanged()">
+
+          <option value="">
+            Select employee
+          </option>
+
+
+          @for (
+            employee of filteredEmployees;
+            track employee.id
+          ) {
+
+            <option
+              [value]="employee.id">
+
+              {{
+                employee.employeeNumber
+              }}
+              -
+              {{
+                employee.nameEn
+              }}
+
+              @if (employee.email) {
+                -
+                {{ employee.email }}
+              }
+
+            </option>
+
+          }
+
+        </select>
+
+
+        @if (
+          loadingEmployees
+        ) {
+
+          <small>
+            Loading employees...
+          </small>
+
+        }
+
+      </div>
+
+
+      @if (selectedEmployee) {
+
+        <div class="employee-preview">
+
+          <div>
+
+            <span>
+              Employee Number
+            </span>
+
+            <strong>
+              {{
+                selectedEmployee
+                  .employeeNumber
+              }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              English Name
+            </span>
+
+            <strong>
+              {{
+                selectedEmployee
+                  .nameEn
+              }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Arabic Name
+            </span>
+
+            <strong>
+              {{
+                selectedEmployee
+                  .nameAr || '-'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Zen ID
+            </span>
+
+            <strong>
+              {{
+                selectedEmployee
+                  .zenId
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      }
+
+
+      <div class="form-grid">
+
+        <div class="field">
+
+          <label>
+            Username
+          </label>
+
+          <input
+            type="text"
+            formControlName="userName"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Email
+          </label>
+
+          <input
+            type="email"
+            formControlName="email"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Short Name
+          </label>
+
+          <input
+            type="text"
+            formControlName="shortName"
+          />
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Temporary Password
+          </label>
+
+          <input
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+
+          <small>
+            Minimum 8 characters with
+            uppercase, lowercase,
+            number and special character.
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="roles">
+
+        <label class="roles-title">
+          Roles
+        </label>
+
+
+        <div class="role-options">
+
+          @for (
+            role of roleOptions;
+            track role
+          ) {
+
+            <label class="role-option">
+
+              <input
+                type="checkbox"
+                [checked]="
+                  hasRole(role)
+                "
+                (change)="
+                  roleChanged(
+                    role,
+                    $event
+                  )
+                "
+              />
+
+              <span>
+                {{ role }}
+              </span>
+
+            </label>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="saving">
+
+        {{
+          saving
+            ? 'Creating...'
+            : 'Create User'
+        }}
+
+      </button>
+
+    </form>
+
+  </section>
+
+</div>

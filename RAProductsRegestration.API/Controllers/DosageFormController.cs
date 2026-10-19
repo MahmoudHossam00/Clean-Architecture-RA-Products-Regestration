@@ -6,7 +6,7 @@ using RAProductsRegestration.Application.Features.DosageForms.Queries.GetAll;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("[controller]")]
 public sealed class DosageFormsController(
     ISender sender)

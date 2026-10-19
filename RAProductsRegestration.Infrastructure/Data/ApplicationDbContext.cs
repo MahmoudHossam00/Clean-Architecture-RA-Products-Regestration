@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RAProductsRegestration.Application.Common.Interfaces.Persistence;
 using RAProductsRegestration.Domain.ActiveIngredients;
@@ -9,6 +11,7 @@ using RAProductsRegestration.Domain.Common.ValueObjects;
 using RAProductsRegestration.Domain.Companies;
 using RAProductsRegestration.Domain.Departments;
 using RAProductsRegestration.Domain.DosageForms;
+using RAProductsRegestration.Domain.Employees;
 using RAProductsRegestration.Domain.LicenseCategories;
 using RAProductsRegestration.Domain.MarketingTypes;
 using RAProductsRegestration.Domain.MiscellaneousApprovalFileTypes;
@@ -23,6 +26,7 @@ using RAProductsRegestration.Domain.PromotionalMaterialTypes;
 using RAProductsRegestration.Domain.StorageConditions;
 using RAProductsRegestration.Domain.Suppliers;
 using RAProductsRegestration.Domain.Variations;
+using RAProductsRegestration.Infrastructure.Identity;
 using ActiveIngredient = RAProductsRegestration.Domain.ActiveIngredients.ActiveIngredient;
 
 
@@ -31,7 +35,7 @@ namespace RAProductsRegestration.Infrastructure.Data;
 
 internal sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options, IMediator mediator)
-    : DbContext(options), IUnitOfWork
+    : IdentityDbContext<AppUser>(options), IUnitOfWork
 {
 
 
@@ -42,7 +46,8 @@ internal sealed class ApplicationDbContext(
     public DbSet<MiscellaneousApprovalFileType>
         MiscellaneousApprovalFileTypes =>
             Set<MiscellaneousApprovalFileType>();
-
+    public DbSet<Employee> Employees =>
+    Set<Employee>();
 
     public DbSet<PromotionalMaterial>
     PromotionalMaterials =>

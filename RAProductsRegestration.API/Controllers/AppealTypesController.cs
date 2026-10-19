@@ -11,7 +11,7 @@ using RAProductsRegestration.Domain.Common.Results;
 namespace RAProductsRegestration.API.Controllers;
 
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/appeal-types")]
 public sealed class AppealTypesController(
     ISender sender)

@@ -8,7 +8,7 @@ using RAProductsRegestration.Application.Features.StorageConditions.Queries.GetA
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("[controller]")]
 public sealed class StorageConditionsController(
     ISender sender)

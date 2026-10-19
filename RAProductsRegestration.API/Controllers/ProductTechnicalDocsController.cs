@@ -12,7 +12,7 @@ using RAProductsRegestration.Application.Features.ProductsTechnicalDocs;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/product-technical-docs")]
 public sealed class ProductTechnicalDocsController(
     ISender sender)

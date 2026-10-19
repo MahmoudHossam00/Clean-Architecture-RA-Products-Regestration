@@ -88,7 +88,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/product-basic-data")]
 public sealed class ProductBasicDataController(
     ISender sender)

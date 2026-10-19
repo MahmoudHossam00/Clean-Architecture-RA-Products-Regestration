@@ -9,7 +9,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/marketing-types")]
 public sealed class MarketingTypesController(
     ISender sender)

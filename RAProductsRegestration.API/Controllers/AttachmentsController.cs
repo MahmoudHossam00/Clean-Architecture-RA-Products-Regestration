@@ -9,7 +9,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/attachments")]
 public sealed class AttachmentsController(
     ISender sender)

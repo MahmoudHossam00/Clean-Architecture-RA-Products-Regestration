@@ -1,0 +1,219 @@
+<div class="login-page">
+
+  <section class="login-brand">
+
+    <div class="brand-content">
+
+      <div class="logo-row">
+
+        <img
+          src="images/logo-fpi.png"
+          alt="FPI"
+          class="logo"
+        />
+
+        <div>
+          <strong>
+            FPI
+          </strong>
+
+          <span>
+            Product Registration
+          </span>
+        </div>
+
+      </div>
+
+
+      <div class="brand-copy">
+
+        <p class="eyebrow">
+          Regulatory Affairs
+        </p>
+
+        <h1>
+          Product Registration
+          Management
+        </h1>
+
+        <p>
+          Centralized management of
+          regulatory products,
+          technical documents,
+          licenses, variations,
+          appeals and approvals.
+        </p>
+
+      </div>
+
+
+      <div class="feature-list">
+
+        <div>
+          Product lifecycle tracking
+        </div>
+
+        <div>
+          Regulatory documentation
+        </div>
+
+        <div>
+          License and approval control
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="login-form-side">
+
+    <div class="login-card">
+
+      <div class="login-header">
+
+        <div class="login-icon">
+          <span>
+            RA
+          </span>
+        </div>
+
+        <h2>
+          Sign in
+        </h2>
+
+        <p>
+          Enter your credentials
+          to continue.
+        </p>
+
+      </div>
+
+
+      @if (errorMessage) {
+
+        <div class="error-banner">
+
+          {{ errorMessage }}
+
+        </div>
+
+      }
+
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()">
+
+        <div class="field">
+
+          <label
+            for="userNameOrEmail">
+
+            Username or email
+
+          </label>
+
+
+          <input
+            id="userNameOrEmail"
+            type="text"
+            formControlName="userNameOrEmail"
+            autocomplete="username"
+            placeholder="Username or email"
+          />
+
+
+          @if (
+            form.controls.userNameOrEmail
+              .touched &&
+            form.controls.userNameOrEmail
+              .invalid
+          ) {
+
+            <small>
+              Username or email
+              is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            for="password">
+
+            Password
+
+          </label>
+
+
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+          />
+
+
+          @if (
+            form.controls.password
+              .touched &&
+            form.controls.password
+              .invalid
+          ) {
+
+            <small>
+              Password must contain
+              at least 8 characters.
+            </small>
+
+          }
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="isLoading">
+
+          @if (isLoading) {
+
+            <span class="spinner">
+            </span>
+
+            Signing in...
+
+          }
+          @else {
+
+            Sign in
+
+            <span>
+              →
+            </span>
+
+          }
+
+        </button>
+
+      </form>
+
+
+      <p class="footer">
+        Future Pharmaceutical Industries
+        · Regulatory Affairs
+      </p>
+
+    </div>
+
+  </section>
+
+</div>

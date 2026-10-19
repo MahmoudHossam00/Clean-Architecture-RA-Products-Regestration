@@ -10,7 +10,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/miscellaneous-approval-file-types")]
 public sealed class MiscellaneousApprovalFileTypesController(
     ISender sender)

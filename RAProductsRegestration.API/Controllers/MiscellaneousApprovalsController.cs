@@ -34,7 +34,7 @@ using RAProductsRegestration.Domain.Common.Results;
 
 namespace RAProductsRegestration.API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("api/miscellaneous-approvals")]
 public sealed class MiscellaneousApprovalsController(
     ISender sender)

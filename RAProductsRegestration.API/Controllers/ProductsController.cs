@@ -5,7 +5,7 @@ using RAProductsRegestration.Application.Features.Products.Queries.GetAll;
 
 namespace RAProductsRegestration.API.Controllers
 {
-    [ApiController]
+    [ApiController][Authorize]
     [Route("[controller]")]
     public class ProductsController(
     ISender sender)

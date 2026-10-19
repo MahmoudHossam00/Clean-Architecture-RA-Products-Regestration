@@ -11,7 +11,7 @@ using RAProductsRegestration
 namespace RAProductsRegestration
     .API.Controllers;
 
-[ApiController]
+[ApiController][Authorize]
 [Route("[controller]")]
 public sealed class SuppliersController(
     ISender sender)
